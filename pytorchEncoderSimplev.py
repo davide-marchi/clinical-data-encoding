@@ -1,77 +1,82 @@
+import random
+import numpy as np
+import utilsData
 import torch
 import torch.nn as nn
-import pandas as pd
 
 device = torch.device(  "cuda" if torch.cuda.is_available() 
                         else  "mps" if torch.backends.mps.is_available()
                         else "cpu"
                     )
+#we have small amount of data, so we will use cpu (looks faster)
+device = torch.device("cpu")
 print("Device: ", device)
 
 
-file_path = './Datasets/data.csv'
-data = pd.read_csv(file_path)
-data_array = data.to_numpy()
-data_array = data_array[:, 1:-1]
-#standardize each column independently
-data_array = (data_array - data_array.min(axis=0)) / (data_array.max(axis=0) - data_array.min(axis=0))
-#normalize each column independently
-#data_array = (data_array - data_array.mean(axis=0)) / data_array.std(axis=0)
-print(data_array.shape)
-#convert to float32
+data_array = utilsData.load_data()
+mask = utilsData.get_mask(data_array)
+data_array = utilsData.standardize_data(data_array, mask)
+data_array = data_array.to_numpy()
+mask = mask.astype('float32')
 data_array = data_array.astype('float32')
+data_array = np.concatenate((data_array, mask), axis=1)
+data_array = data_array[0:420*8]
+data_array = torch.from_numpy(data_array)
+data_array = data_array.to(device)
 
 class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(in_features=data_array.shape[1], out_features=18, bias=True),
-            nn.Tanh(),
-            nn.Linear(in_features=18, out_features=15, bias=True),
-            nn.Tanh(),
-            nn.Linear(in_features=15, out_features=5, bias=True),
-            nn.Tanh(),
-            nn.Linear(in_features=5, out_features=15, bias=True),
-            nn.Tanh(),
-            nn.Linear(in_features=15, out_features=18, bias=True),
-            nn.Tanh(),
-            nn.Linear(in_features=18, out_features=data_array.shape[1], bias=True)
+            nn.Linear(in_features=data_array.shape[1]//2, out_features=5, bias=True),
+            nn.ReLU(),
+            #nn.Linear(in_features=18, out_features=18, bias=True),
+            #nn.ReLU(),
+            #nn.Linear(in_features=18, out_features=5, bias=True),
+            #nn.ReLU(),
+            nn.Linear(in_features=5, out_features=18, bias=True),
+            nn.ReLU(),
+            #nn.Linear(in_features=18, out_features=18, bias=True),
+            #nn.ReLU(),
+            nn.Linear(in_features=18, out_features=data_array.shape[1]//2, bias=True)
         )
         #initialize the weights
         for m in self.modules():
             if isinstance(m, nn.Linear):
-                nn.init.xavier_normal_(m.weight)
+                nn.init.kaiming_uniform_(m.weight)
                 nn.init.zeros_(m.bias)
     
     def forward(self, x):
-        x1, x2 = torch.chunk(x, 2, dim=1)
-        return torch.cat([self.linear_relu_stack(x1), x2], dim=1)
+        return self.linear_relu_stack(x)
     
     def training_step(self, batch):
         x = batch
-        zeros = torch.zeros(x.size()).to(device)
-        y_hat = self(torch.cat([x, zeros], dim=1))
-        y = torch.cat([x, zeros], dim=1)
-        loss = nn.functional.mse_loss(y_hat, y)
+        val, mask = torch.chunk(x, 2, dim=1)
+        y_hat = torch.mul(self(val), mask)
+        y = torch.mul(val, mask)
+        #y_hat = self(val)
+        loss = nn.functional.mse_loss(y, y_hat)
+        #if random.randint(0,100) == 100:
+        #    print(val[1],'\n\n', y_hat[1], loss)
         return loss
     
 model = NeuralNetwork().to(device)
 print(model)
 
 # Define the optimizer
-optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.95, nesterov=True)
+optimizer = torch.optim.RMSprop(model.parameters(), lr=0.0005)
 
 # Define the data loader
-batch_size = 512
+batch_size = 420
 data_loader = torch.utils.data.DataLoader(data_array, batch_size=batch_size, shuffle=True)
 
 # Train the network
-num_epochs = 90
+num_epochs = 1000
 losses = []
 for epoch in range(num_epochs):
     for batch in data_loader:
         # Move batch to device
-        batch = batch.to(device)
+        #batch = batch.to(device)
         
         # Zero the gradients
         optimizer.zero_grad()
