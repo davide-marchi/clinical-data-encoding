@@ -29,7 +29,7 @@ class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
         self.linear_relu_stack = nn.Sequential(
-            nn.Linear(in_features=data_array.shape[1]//2, out_features=40, bias=True),
+            nn.Linear(in_features=data_array.shape[1], out_features=40, bias=True),
             nn.ReLU(),
             nn.Linear(in_features=40, out_features=30, bias=True),
             nn.ReLU(),
@@ -53,7 +53,7 @@ class NeuralNetwork(nn.Module):
     def training_step(self, batch):
         x = batch
         val, mask = torch.chunk(x, 2, dim=1)
-        y_hat = torch.mul(self(val), mask)
+        y_hat = torch.mul(self(x), mask)
         y = torch.mul(val, mask)
         loss = nn.functional.mse_loss(y, y_hat)
         return loss
