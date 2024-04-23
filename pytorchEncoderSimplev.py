@@ -15,7 +15,7 @@ print("Device: ", device)
 
 data_array = utilsData.load_data()
 mask = utilsData.get_mask(data_array)
-data_array = utilsData.standardize_data(data_array, mask)
+data_array, binary_clumns = utilsData.standardize_data(data_array, mask)
 data_array = data_array.to_numpy()
 mask = mask.astype('float32')
 data_array = data_array.astype('float32')
@@ -25,22 +25,33 @@ train_data, val_data = train_test_split(data_array, test_size=0.2, random_state=
 train_data = torch.from_numpy(train_data)
 val_data = torch.from_numpy(val_data)
 
+print(f'Number of binary columns: {binary_clumns}')
+
 class NeuralNetwork(nn.Module):
-    def __init__(self):
+    def __init__(self, total_binary_columns: int = 0, embedding_dim: int = 10):
         super().__init__()
+        self.total_binary_columns = total_binary_columns
         self.linear_relu_stack = nn.Sequential(
             nn.Linear(in_features=data_array.shape[1], out_features=40, bias=True),
-            nn.ReLU(),
+            nn.LeakyReLU(),
+            nn.Linear(in_features=40, out_features=40, bias=True),
+            nn.LeakyReLU(),
             nn.Linear(in_features=40, out_features=30, bias=True),
-            nn.ReLU(),
-            nn.Linear(in_features=30, out_features=5, bias=True),
-            nn.ReLU(),
-            nn.Linear(in_features=5, out_features=30, bias=True),
-            nn.ReLU(),
+            nn.LeakyReLU(),
+            nn.Linear(in_features=30, out_features=embedding_dim, bias=True),
+            nn.LeakyReLU(),
+            nn.Linear(in_features=embedding_dim, out_features=30, bias=True),
+            nn.LeakyReLU(),
             nn.Linear(in_features=30, out_features=40, bias=True),
-            nn.ReLU(),
-            nn.Linear(in_features=40, out_features=data_array.shape[1]//2, bias=True)
+            nn.LeakyReLU(),
+            nn.Linear(in_features=40, out_features=40, bias=True),
+            nn.LeakyReLU(),
+            nn.Linear(in_features=40, out_features=40, bias=True),
+            nn.LeakyReLU()
         )
+        self.binaOut = nn.Linear(in_features=40, out_features=total_binary_columns, bias=True)
+        self.binActivation = nn.Sigmoid()
+        self.contOut = nn.Linear(in_features=40, out_features=data_array.shape[1]//2 - total_binary_columns, bias=True)
         #initialize the weights
         for m in self.modules():
             if isinstance(m, nn.Linear):
@@ -48,17 +59,49 @@ class NeuralNetwork(nn.Module):
                 nn.init.uniform_(m.bias, -0.5, 0.5)
     
     def forward(self, x):
-        return self.linear_relu_stack(x)
+        x = self.linear_relu_stack(x)
+        x1 = self.binActivation(self.binaOut(x))
+        x2 = self.contOut(x)
+        x = torch.cat((x1, x2), dim=1)
+        return x
+    
+    def mse_loss(self, batch):
+        x = batch
+        val, mask = torch.chunk(x, 2, dim=1)
+        y_hat = torch.mul(self(x), mask)
+        y = torch.mul(val, mask)
+        return nn.functional.mse_loss(y, y_hat)
+    
+    def r_squared(self, batch):
+        x = batch
+        val, mask = torch.chunk(x, 2, dim=1)
+        y_hat = torch.mul(self(x), mask)
+        y = torch.mul(val, mask)
+        y_mean = torch.mean(y)
+        ss_tot = torch.sum((y - y_mean)**2)
+        ss_res = torch.sum((y - y_hat)**2)
+        return 1 - ss_res / ss_tot
     
     def training_step(self, batch):
         x = batch
         val, mask = torch.chunk(x, 2, dim=1)
         y_hat = torch.mul(self(x), mask)
         y = torch.mul(val, mask)
+        '''
+        y_hat_bin = y_hat[:, :self.total_binary_columns]
+        y_bin = y[:, :self.total_binary_columns]
+        loss_bin = 0
+        for i in range(self.total_binary_columns):
+            loss_bin += nn.functional.binary_cross_entropy(y_hat_bin[:, i], y_bin[:, i])
+        y_hat_cont = y_hat[:, :-self.total_binary_columns]
+        y_cont = y[:, :-self.total_binary_columns]
+        loss_cont = nn.functional.mse_loss(y_cont, y_hat_cont)
+        loss = loss_bin + loss_cont
+        '''
         loss = nn.functional.mse_loss(y, y_hat)
         return loss
-    
-model = NeuralNetwork().to(device)
+
+model = NeuralNetwork(total_binary_columns=binary_clumns, embedding_dim=5).to(device)
 print(model)
 
 # Define the optimizer
@@ -86,10 +129,15 @@ for epoch in range(num_epochs):
     val_loss = model.training_step(val_data)
     losses_val.append(val_loss.item())
     loss_tr = model.training_step(train_data)
+    mse_loss = model.mse_loss(val_data)
     losses_tr.append(loss_tr.item())
     if epoch % 500 == 0:
         print()
-    print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {loss_tr.item():.4f}, Val Loss: {val_loss.item():.4f}", end='\r')
+    print(f"Epoch [{epoch+1}/{num_epochs}], \
+Loss: {loss_tr.item():.4f}, \
+Val Loss: {val_loss.item():.4f}, \
+Val MSE: {mse_loss.item():.4f}, \
+R^2 : {model.r_squared(val_data)}", end='\r')
     if epoch == 0:
         print('')
 
