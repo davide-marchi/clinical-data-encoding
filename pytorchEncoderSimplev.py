@@ -124,13 +124,13 @@ model = NeuralNetwork(total_binary_columns=binary_clumns, embedding_dim=5).to(de
 #print(model)
 
 # Define the optimizer
-optimizer = torch.optim.Adam(model.parameters(), weight_decay=2e-5, lr=0.0004)
+optimizer = torch.optim.Adam(model.parameters(), weight_decay=0.5e-5, lr=0.0002)
 
 # Define the data loader
 batch_size = 100
 
 # Train the network
-num_epochs = 1000
+num_epochs = 600
 losses_tr = []
 losses_val = []
 accuracy = [0]
