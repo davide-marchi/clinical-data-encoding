@@ -79,9 +79,7 @@ class IMEO(nn.Module):
             return nn.functional.mse_loss(y, y_hat)
         y_hat_bin = y_hat[:, :self.total_binary_columns]
         y_bin = y[:, :self.total_binary_columns]
-        loss_bin = 0
-        for i in range(self.total_binary_columns):
-            loss_bin += nn.functional.binary_cross_entropy(y_hat_bin[:, i], y_bin[:, i])
+        loss_bin = nn.functional.binary_cross_entropy(y_hat_bin, y_bin)
         y_hat_cont = y_hat[:, :-self.total_binary_columns]
         y_cont = y[:, :-self.total_binary_columns]
         loss_cont = nn.functional.mse_loss(y_cont, y_hat_cont)
