@@ -72,37 +72,39 @@ class NeuralNetwork(nn.Module):
         y = torch.mul(val, mask)
         return nn.functional.mse_loss(y, y_hat)
     
-    def compute_r_squared(self, batch):
+    def compute_r_squared(self, batch, binCol: int = 0):
         x = batch
         val, mask = torch.chunk(x, 2, dim=1)
         y_hat = torch.mul(self(x), mask)
         y = torch.mul(val, mask)
-        if self.total_binary_columns == 0:
+        if self.total_binary_columns == 0 and binCol == 0:
             y_mean = torch.mean(y)
             ss_tot = torch.sum((y - y_mean)**2)
             ss_res = torch.sum((y - y_hat)**2)
             return (1 - ss_res / ss_tot).item()
         else:
-            y_hat_cont = y_hat[:, :-self.total_binary_columns]
-            y_cont = y[:, :-self.total_binary_columns]
+            binCol = self.total_binary_columns if binCol == 0 else binCol
+            y_hat_cont = y_hat[:, :-binCol]
+            y_cont = y[:, :-binCol]
             y_mean = torch.mean(y_cont)
             ss_tot = torch.sum((y_cont - y_mean)**2)
             ss_res = torch.sum((y_cont - y_hat_cont)**2)
             return (1 - ss_res / ss_tot).item()
     
-    def compute_accuracy(self, batch):
-        if self.total_binary_columns == 0:
+    def compute_accuracy(self, batch, binCol: int = 0):
+        if self.total_binary_columns == 0 and binCol == 0:
             return 0
         x = batch
+        binCol = self.total_binary_columns if binCol == 0 else binCol
         val, mask = torch.chunk(x, 2, dim=1)
         y_hat = torch.mul(self(x), mask)
         y = torch.mul(val, mask)
-        y_hat_bin = y_hat[:, :self.total_binary_columns]
-        y_bin = y[:, :self.total_binary_columns]
+        y_hat_bin = y_hat[:, :binCol]
+        y_bin = y[:, :binCol]
         y_hat_bin = torch.round(y_hat_bin)
-        return (torch.sum(y_hat_bin == y_bin) / (y_hat_bin.shape[0] * self.total_binary_columns)).item()
+        return (torch.sum(y_hat_bin == y_bin) / (y_hat_bin.shape[0] * binCol)).item()
     
-    def training_step(self, batch):
+    def training_step(self, batch, binaryWeight:float = 0.5):
         x = batch
         val, mask = torch.chunk(x, 2, dim=1)
         y_hat = torch.mul(self(x), mask)
@@ -117,7 +119,7 @@ class NeuralNetwork(nn.Module):
         y_hat_cont = y_hat[:, :-self.total_binary_columns]
         y_cont = y[:, :-self.total_binary_columns]
         loss_cont = nn.functional.mse_loss(y_cont, y_hat_cont)
-        loss = loss_bin + loss_cont
+        loss = binaryWeight*loss_bin + (1 - binaryWeight)*loss_cont
         return loss
 
 model = NeuralNetwork(total_binary_columns=binary_clumns, embedding_dim=5).to(device)
@@ -142,7 +144,7 @@ data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shu
 for epoch in range(num_epochs):
     for batch in data_loader:
         optimizer.zero_grad()
-        loss = model.training_step(batch)
+        loss = model.training_step(batch, binaryWeight=1/binary_clumns)
         loss.backward()
         optimizer.step()
         
@@ -151,8 +153,8 @@ for epoch in range(num_epochs):
     losses_val.append(val_loss.item())
     loss_tr = model.training_step(train_data)
     mse_loss = model.mse_loss(val_data)
-    accuracy.append(model.compute_accuracy(val_data))
-    r_squared.append(model.compute_r_squared(val_data))
+    accuracy.append(model.compute_accuracy(val_data, binary_clumns))
+    r_squared.append(model.compute_r_squared(val_data, binary_clumns))
     losses_tr.append(loss_tr.item())
     if epoch % 200 == 0:
         print()
