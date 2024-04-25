@@ -27,18 +27,21 @@ train_data, val_data = train_test_split(data_array, test_size=0.2, random_state=
 train_data = torch.from_numpy(train_data)
 val_data = torch.from_numpy(val_data)
 
+binary_loss_weight = 0.5
+batch_size = 100
+learning_rate = 0.0002
+plot = False
 print(f'Number of binary columns: {binary_clumns}')
+print(f'Binary loss weight: {binary_loss_weight}')
+print(f'Batch size: {batch_size}')
+print(f'Learning rate: {learning_rate}')
 
 model = IMEO(inputSize=data_array.shape[1], total_binary_columns=binary_clumns, embedding_dim=5)
 
 model.to(device)
 
 
-# Define the optimizer
-optimizer = torch.optim.Adam(model.parameters(), weight_decay=0.5e-5, lr=0.0002)
-
-# Define the data loader
-batch_size = 100
+optimizer = torch.optim.Adam(model.parameters(), weight_decay=0.5e-5, lr=learning_rate)
 
 # Train the network
 num_epochs = 600
@@ -53,7 +56,7 @@ data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shu
 for epoch in range(num_epochs):
     for batch in data_loader:
         optimizer.zero_grad()
-        loss = model.training_step(batch)
+        loss = model.training_step(batch, binaryLossWeight=binary_loss_weight)
         loss.backward()
         optimizer.step()
         
@@ -70,13 +73,13 @@ for epoch in range(num_epochs):
 Loss: {loss_tr.item():.4f}, \
 Val Loss: {val_loss.item():.4f}, \
 Val R^2: {r_squared[-1]:.2f} \
-Val acc: {accuracy[-1]:.2f}", end='\r')
+Val acc: {accuracy[-1]:.2f}     ", end='\r')
     if epoch == 0:
         print('')
 
 print('Training complete\t\t\t\t')
 
-
+if not plot: exit()
 
 #show plot of loss
 import matplotlib.pyplot as plt

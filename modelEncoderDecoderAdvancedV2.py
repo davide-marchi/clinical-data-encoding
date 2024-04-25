@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from torcheval.metrics.functional import r2_score
 
+torch.manual_seed(42)
+
 class IMEO(nn.Module):
     def __init__(self, inputSize:int, total_binary_columns: int = 0, embedding_dim: int = 10):
         '''
@@ -40,6 +42,10 @@ class IMEO(nn.Module):
                 nn.init.uniform_(m.bias, -0.5, 0.5)
     
     def forward(self, x):
+        '''
+        x: tensor of shape (batch_size, inputSize)
+        return: tensor of shape (batch_size, inputSize//2)
+        '''
         x = self.linear_relu_stack(x)
         x1 = self.binActivation(self.binaOut(x))
         x2 = self.contOut(x)
@@ -47,6 +53,12 @@ class IMEO(nn.Module):
         return x
     
     def compute_r_squared(self, batch, binCol: int = 0):
+        '''
+        batch: tensor of shape (batch_size, inputSize)
+        binCol: int the number of binary columns in the data (binary data should be the first columns)
+            if omitted, the total_binary_columns used during creation of the NN will be used
+        return: float the r squared value
+        '''
         x = batch
         val, mask = torch.chunk(x, 2, dim=1)
         y_hat = torch.mul(self(x), mask)
@@ -58,6 +70,12 @@ class IMEO(nn.Module):
         return r2_score(y, y_hat).item()
     
     def compute_accuracy(self, batch, binCol: int = 0):
+        '''
+        batch: tensor of shape (batch_size, inputSize)
+        binCol: int the number of binary columns in the data (binary data should be the first columns)
+            if omitted, the total_binary_columns used during creation of the NN will be used
+        return: float the accuracy value
+        '''
         if self.total_binary_columns == 0 and binCol == 0:
             return 0
         x = batch
@@ -70,7 +88,13 @@ class IMEO(nn.Module):
         y_hat_bin = torch.round(y_hat_bin)
         return (torch.sum(y_hat_bin == y_bin) / (y_hat_bin.shape[0] * binCol)).item()
     
-    def training_step(self, batch, weightedLoss:bool = True):
+    def training_step(self, batch, binaryLossWeight: float = 0.5):
+        '''
+        batch: tensor of shape (batch_size, inputSize)
+        binaryLossWeight: float the weight of the binary loss in the total loss (0 <= binaryLossWeight <= 1)
+            the weight of the continuous loss will be 1 - binaryLossWeight
+        return: the total loss
+        '''
         x = batch
         val, mask = torch.chunk(x, 2, dim=1)
         y_hat = torch.mul(self(x), mask)
@@ -83,8 +107,5 @@ class IMEO(nn.Module):
         y_hat_cont = y_hat[:, :-self.total_binary_columns]
         y_cont = y[:, :-self.total_binary_columns]
         loss_cont = nn.functional.mse_loss(y_cont, y_hat_cont)
-        if not weightedLoss:
-            return loss_bin + loss_cont
-        binaryWeight = self.total_binary_columns / (self.inputSize//2)
-        loss = binaryWeight*loss_bin + (1 - binaryWeight)*loss_cont
+        loss = binaryLossWeight*loss_bin + (1 - binaryLossWeight)*loss_cont
         return loss
