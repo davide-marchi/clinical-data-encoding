@@ -2,6 +2,7 @@ import numpy as np
 import utilsData
 import torch
 import torch.nn as nn
+from torcheval.metrics.functional import r2_score
 from sklearn.model_selection import train_test_split
 
 device = torch.device(  "cuda" if torch.cuda.is_available() 
@@ -77,19 +78,11 @@ class NeuralNetwork(nn.Module):
         val, mask = torch.chunk(x, 2, dim=1)
         y_hat = torch.mul(self(x), mask)
         y = torch.mul(val, mask)
-        if self.total_binary_columns == 0 and binCol == 0:
-            y_mean = torch.mean(y)
-            ss_tot = torch.sum((y - y_mean)**2)
-            ss_res = torch.sum((y - y_hat)**2)
-            return (1 - ss_res / ss_tot).item()
-        else:
+        if self.total_binary_columns != 0 or binCol != 0:
             binCol = self.total_binary_columns if binCol == 0 else binCol
-            y_hat_cont = y_hat[:, :-binCol]
-            y_cont = y[:, :-binCol]
-            y_mean = torch.mean(y_cont)
-            ss_tot = torch.sum((y_cont - y_mean)**2)
-            ss_res = torch.sum((y_cont - y_hat_cont)**2)
-            return (1 - ss_res / ss_tot).item()
+            y_hat = y_hat[:, :-binCol]
+            y = y[:, :-binCol]
+        return r2_score(y, y_hat).item()
     
     def compute_accuracy(self, batch, binCol: int = 0):
         if self.total_binary_columns == 0 and binCol == 0:
@@ -168,6 +161,8 @@ Val acc: {accuracy[-1]:.2f}", end='\r')
         print('')
 
 print('Training complete\t\t\t\t')
+
+
 
 #show plot of loss
 import matplotlib.pyplot as plt
