@@ -14,21 +14,30 @@ class IMEO(nn.Module):
         super().__init__()
         self.total_binary_columns = total_binary_columns
         self.inputSize = inputSize
-        self.linear_relu_stack = nn.Sequential(
+        self.encoder = nn.Sequential(
             nn.Linear(in_features=inputSize, out_features=40, bias=True),
             nn.LeakyReLU(),
+            nn.BatchNorm1d(40),
             nn.Linear(in_features=40, out_features=40, bias=True),
             nn.LeakyReLU(),
+            nn.BatchNorm1d(40),
             nn.Linear(in_features=40, out_features=30, bias=True),
             nn.LeakyReLU(),
+            nn.BatchNorm1d(30),
             nn.Linear(in_features=30, out_features=embedding_dim, bias=True),
             nn.LeakyReLU(),
+        )
+        self.decoder = nn.Sequential(
+            nn.BatchNorm1d(embedding_dim),
             nn.Linear(in_features=embedding_dim, out_features=30, bias=True),
             nn.LeakyReLU(),
+            nn.BatchNorm1d(30), 
             nn.Linear(in_features=30, out_features=40, bias=True),
             nn.LeakyReLU(),
+            nn.BatchNorm1d(40),
             nn.Linear(in_features=40, out_features=40, bias=True),
             nn.LeakyReLU(),
+            nn.BatchNorm1d(40),
             nn.Linear(in_features=40, out_features=40, bias=True),
             nn.LeakyReLU()
         )
@@ -46,11 +55,19 @@ class IMEO(nn.Module):
         x: tensor of shape (batch_size, inputSize)
         return: tensor of shape (batch_size, inputSize//2)
         '''
-        x = self.linear_relu_stack(x)
+        x = self.encoder(x)
+        x = self.decoder(x)
         x1 = self.binActivation(self.binaOut(x))
         x2 = self.contOut(x)
         x = torch.cat((x1, x2), dim=1)
         return x
+    
+    def encode(self, x):
+        '''
+        x: tensor of shape (batch_size, inputSize)
+        return: tensor of shape (batch_size, embedding_dim)
+        '''
+        return self.encoder(x)
     
     def compute_r_squared(self, batch, binCol: int = 0):
         '''
@@ -88,7 +105,16 @@ class IMEO(nn.Module):
         y_hat_bin = torch.round(y_hat_bin)
         return (torch.sum(y_hat_bin == y_bin) / (y_hat_bin.shape[0] * binCol)).item()
     
-    def training_step(self, batch, binaryLossWeight: float = 0.5):
+    def weighted_measure(self, batch, binCol: int = 0):
+        acc = self.compute_accuracy(batch, binCol)
+        r2 = self.compute_r_squared(batch, binCol)
+        if self.total_binary_columns == 0 and binCol == 0:
+            return 0
+        binCol = self.total_binary_columns if binCol == 0 else binCol
+        binWeight = binCol / (self.inputSize // 2)
+        return acc * binWeight + r2 * (1 - binWeight)
+    
+    def training_step(self, batch, binaryLossWeight: float = 0.5, forceMSE: bool = False):
         '''
         batch: tensor of shape (batch_size, inputSize)
         binaryLossWeight: float the weight of the binary loss in the total loss (0 <= binaryLossWeight <= 1)
@@ -99,7 +125,7 @@ class IMEO(nn.Module):
         val, mask = torch.chunk(x, 2, dim=1)
         y_hat = torch.mul(self(x), mask)
         y = torch.mul(val, mask)
-        if self.total_binary_columns == 0:
+        if self.total_binary_columns == 0 or forceMSE:
             return nn.functional.mse_loss(y, y_hat)
         y_hat_bin = y_hat[:, :self.total_binary_columns]
         y_bin = y[:, :self.total_binary_columns]
