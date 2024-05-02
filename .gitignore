@@ -3,4 +3,4 @@ __pycache__/utilsData.cpython-38.pyc
 *.pyc
 /__pycache__
 Copy_of_Strings_Regular_expressions_and_BS4.ipynb
-.DS_Store
+*.DS_Store
