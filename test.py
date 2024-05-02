@@ -1,4 +1,4 @@
-from modelEncoderDecoderAdvancedV2 import IMEO
+from modelEncoderDecoderAdvancedV2 import IMEO, trainIMEO
 import numpy as np
 import utilsData
 import torch
@@ -44,7 +44,7 @@ model.to(device)
 optimizer = torch.optim.Adam(model.parameters(), weight_decay=0.5e-5, lr=learning_rate)
 
 # Train the network
-num_epochs = 1000
+num_epochs = 300
 losses_tr = []
 losses_val = []
 accuracy = [0]
@@ -54,33 +54,20 @@ train_data = train_data.to(device)
 val_data = val_data.to(device)
 data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
-for epoch in range(num_epochs):
-    for batch in data_loader:
-        optimizer.zero_grad()
-        loss = model.training_step(batch, binaryLossWeight=binary_loss_weight)
-        loss.backward()
-        optimizer.step()
-        
-    #compute the validation loss
-    val_loss = model.training_step(val_data)
-    losses_val.append(val_loss.item())
-    loss_tr = model.training_step(train_data)
-    accuracy.append(model.compute_accuracy(val_data, binary_clumns))
-    r_squared.append(model.compute_r_squared(val_data, binary_clumns))
-    weighed_goodness.append(model.weighted_measure(val_data, binary_clumns))
-    losses_tr.append(loss_tr.item())
-    if epoch % 200 == 0:
-        print()
-    print(f"Epoch [{epoch+1}/{num_epochs}], \
-Loss: {loss_tr.item():.4f}, \
-Val Loss: {val_loss.item():.4f}, \
-Val R^2: {r_squared[-1]:.2f} \
-Val acc: {accuracy[-1]:.2f} \
-New a^2: {weighed_goodness[-1]:.2f}      ", end='\r')
-    if epoch == 0:
-        print('')
+history = trainIMEO(model, 
+                    train_data, 
+                    val_data, 
+                    optimizer, 
+                    binary_clumns, 
+                    device, 
+                    num_epochs, 
+                    batch_size, 
+                    binary_loss_weight, 
+                    plot=False,
+                    print_every=50
+                )
 
-print('Training complete\t\t\t\t')
+exit()
 
 if not plot: exit()
 
