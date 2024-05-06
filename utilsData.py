@@ -6,7 +6,7 @@ import pandas as pd
 def load_data() -> pd.DataFrame:
     file_path = './Datasets/data_refactor.csv'
     data = pd.read_csv(file_path, sep=';')
-    data = data.iloc[:, 1:-1]
+    data = data.iloc[:, 1:]
     return data
 
 def get_mask(data: pd.DataFrame) -> np.ndarray:
