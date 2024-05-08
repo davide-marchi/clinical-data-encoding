@@ -5,10 +5,8 @@ import torch
 from sklearn.model_selection import train_test_split
 
 
-def load_data() -> pd.DataFrame:
-    file_path = './Datasets/data_refactor.csv'
-    data = pd.read_csv(file_path, sep=';')
-    data = data.iloc[:, 1:]
+def load_data(path:str) -> pd.DataFrame:
+    data = pd.read_csv(path)
     return data
 
 def get_mask(data: pd.DataFrame) -> np.ndarray:
@@ -57,6 +55,11 @@ def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_s
     mask = mask.to_numpy()
 
     train_out = data.iloc[:, -1]
+    data = data.iloc[:, :-1]
+
+    print(f'data shape: {data.shape}')
+    print(f'train_out shape: {train_out.shape}')
+    print(f'mask shape: {mask.shape}')
 
     train_data, test_data = train_test_split(data, test_size=test_size, random_state=random_state)
     train_out, test_out = train_test_split(train_out, test_size=test_size, random_state=random_state)

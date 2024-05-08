@@ -1,5 +1,5 @@
-from modelEncoderDecoderAdvancedV2 import IMEO
-from classifierModelGenralFirstVersionBasic import ClassifierBinary
+from Encoder_classifier.modelEncoderDecoderAdvancedV2 import IMEO
+from Encoder_classifier.classifierModelGenralFirstVersionBasic import ClassifierBinary
 import numpy as np
 import utilsData
 import torch
