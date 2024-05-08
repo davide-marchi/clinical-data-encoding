@@ -67,6 +67,10 @@ def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_s
 
     train_data, val_data, test_data, binary_clumns = normalize_data(train_data, val_data, test_data, train_mask)
 
+    train_data[train_mask == 0] = 0
+    val_data[val_mask == 0] = 0
+    test_data[test_mask == 0] = 0
+    
     train_data = np.concatenate((train_data, train_mask), axis=1)
     val_data = np.concatenate((val_data, val_mask), axis=1)
     test_data = np.concatenate((test_data, test_mask), axis=1)
@@ -74,7 +78,7 @@ def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_s
     train_data = train_data.astype(np.float32)
     val_data = val_data.astype(np.float32)
     test_data = test_data.astype(np.float32)
-    
+
     train_data = torch.from_numpy(train_data)
     val_data = torch.from_numpy(val_data)
     test_data = torch.from_numpy(test_data)

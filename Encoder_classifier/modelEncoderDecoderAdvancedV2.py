@@ -141,6 +141,12 @@ class IMEO(nn.Module):
             return nn.functional.mse_loss(y, y_hat)
         y_hat_bin = y_hat[:, :self.total_binary_columns]
         y_bin = y[:, :self.total_binary_columns]
+        print(f'total binary columns: {self.total_binary_columns}')
+        print(f'ybin shape: {y_bin.shape}')
+        print(f'y_hat_bin shape: {y_hat_bin.shape}')
+        print(f'ybin[0]: {y_bin[0]}')
+        print(f'y_hat_bin[0]: {y_hat_bin[0]}')
+        exit()
         loss_bin = nn.functional.binary_cross_entropy(y_hat_bin, y_bin)
         y_hat_cont = y_hat[:, :-self.total_binary_columns]
         y_cont = y[:, :-self.total_binary_columns]
