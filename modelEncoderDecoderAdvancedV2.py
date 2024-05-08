@@ -50,6 +50,12 @@ class IMEO(nn.Module):
                 nn.init.kaiming_uniform_(m.weight)
                 nn.init.uniform_(m.bias, -0.5, 0.5)
     
+    def saveModel(self, path):
+        torch.save(self.state_dict(), path)
+
+    def loadModel(self, path):
+        self.load_state_dict(torch.load(path))
+
     def reset(self):
         for m in self.modules():
             if isinstance(m, nn.Linear):

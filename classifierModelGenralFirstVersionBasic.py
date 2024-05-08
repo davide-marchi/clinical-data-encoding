@@ -27,6 +27,9 @@ class ClassifierBinary(nn.Module):
             if isinstance(m, nn.Linear):
                 nn.init.kaiming_uniform_(m.weight)
                 nn.init.uniform_(m.bias, -0.5, 0.5)
+    
+    def saveModel(self, path):
+        torch.save(self.state_dict(), path)
 
     def forward(self, x):
         return self.network(x)
