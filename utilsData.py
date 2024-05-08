@@ -82,6 +82,11 @@ def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_s
     train_data = torch.from_numpy(train_data)
     val_data = torch.from_numpy(val_data)
     test_data = torch.from_numpy(test_data)
+
+    train_out = torch.from_numpy(train_out.to_numpy()).float()
+    val_out = torch.from_numpy(val_out.to_numpy()).float()
+    test_out = torch.from_numpy(test_out.to_numpy()).float()
+    
     return {'tr_data': train_data, 
             'tr_out': train_out, 
             'val_data': val_data, 
