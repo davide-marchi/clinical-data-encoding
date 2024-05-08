@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.utils
 from torcheval.metrics.functional import binary_accuracy
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, TensorDataset
 
 torch.manual_seed(42)
 
@@ -60,8 +60,16 @@ class ClassifierBinary(nn.Module):
         val_losses = []
         train_accuracies = []
         val_accuracies = []
-        train_loader = DataLoader(DatasetClassificator(train_data, tr_out), batch_size=batch_size, shuffle=True)
-        val_loader = DataLoader(DatasetClassificator(val_data, val_out), batch_size=batch_size)
+        print(f'output: {tr_out.shape}')
+        print(f'input: {train_data.shape}')
+        if train_data.shape[0] != tr_out.shape[0]:
+            print("Error: The number of samples in the input and output tensors must match")
+        print(f"Input: {val_data.shape}")
+        print(f"Output: {val_out.shape}")
+        if val_data.shape[0] != val_out.shape[0]:
+            print("Error: The number of samples in the input and output tensors must match")
+        train_loader = DataLoader(TensorDataset(train_data, tr_out), batch_size=batch_size, shuffle=True)
+        val_loader = DataLoader(TensorDataset(val_data, val_out), batch_size=batch_size)
 
         self.to(device)
         self.train()
@@ -135,7 +143,7 @@ class ClassifierBinary(nn.Module):
 
         return train_losses, val_losses, train_accuracies, val_accuracies
     
-class DatasetClassificator(Dataset):
+class DatasetClassificator(TensorDataset):
     def __init__(self, data, target):
         self.data = data
         self.target = target
