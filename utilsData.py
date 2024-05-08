@@ -57,10 +57,6 @@ def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_s
     train_out = data.iloc[:, -1]
     data = data.iloc[:, :-1]
 
-    print(f'data shape: {data.shape}')
-    print(f'train_out shape: {train_out.shape}')
-    print(f'mask shape: {mask.shape}')
-
     train_data, test_data = train_test_split(data, test_size=test_size, random_state=random_state)
     train_out, test_out = train_test_split(train_out, test_size=test_size, random_state=random_state)
     train_mask, test_mask = train_test_split(mask, test_size=test_size, random_state=random_state)
