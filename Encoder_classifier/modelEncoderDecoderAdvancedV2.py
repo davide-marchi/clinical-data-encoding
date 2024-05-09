@@ -41,9 +41,9 @@ class IMEO(nn.Module):
             nn.Linear(in_features=neurons_num[0], out_features=neurons_num[0], bias=True),
             nn.LeakyReLU()
         )
-        self.binaOut = nn.Linear(in_features=40, out_features=total_binary_columns, bias=True)
+        self.binaOut = nn.Linear(in_features=neurons_num[0], out_features=total_binary_columns, bias=True)
         self.binActivation = nn.Sigmoid()
-        self.contOut = nn.Linear(in_features=40, out_features=inputSize//2 - total_binary_columns, bias=True)
+        self.contOut = nn.Linear(in_features=neurons_num[0], out_features=inputSize//2 - total_binary_columns, bias=True)
         #initialize the weights
         for m in self.modules():
             if isinstance(m, nn.Linear):
@@ -222,10 +222,13 @@ class IMEO(nn.Module):
         print('\nTraining complete\t\t\t\t')
         if plot:
             import matplotlib.pyplot as plt
-            fig, ax = plt.subplots(1, len(metrics), figsize=(20, 5))
-            for i, metric in enumerate(metrics):
-                ax[i].plot(metrics_hystory[metric])
-                ax[i].set_title(metric)
+            for metric in metrics:
+                if 'loss' in metric:
+                    plt.plot(metrics_hystory[metric], label=metric)
+            plt.show()
+            for metric in metrics:
+                if 'loss' not in metric:
+                    plt.plot(metrics_hystory[metric], label=metric)
             plt.show()
         return metrics_hystory
         

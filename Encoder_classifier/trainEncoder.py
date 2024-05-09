@@ -25,12 +25,12 @@ val_out = dict['val_out']
 binary_clumns = dict['bin_col']
 
 
-binary_loss_weight = binary_clumns / (tr_data.shape[1]//2)
+binary_loss_weight = 0.5
 batch_size = 100
 learning_rate = 0.002
-plot = False
+plot = True
 embedding_dim = 17
-weight_decay = 0.5e-5
+weight_decay = 0.8e-5
 num_epochs = 300
 
 print(f'Number of binary columns: {binary_clumns}')
@@ -42,9 +42,14 @@ print(f'Embedding dimension: {embedding_dim}')
 print(f'Weight decay: {weight_decay}')
 print(f'Number of epochs: {num_epochs}')
 
-encoder_decoder = IMEO(inputSize=tr_data.shape[1], total_binary_columns=binary_clumns, embedding_dim=embedding_dim)
+encoder_decoder = IMEO(
+    inputSize=tr_data.shape[1], 
+    total_binary_columns=binary_clumns, 
+    embedding_dim=embedding_dim,
+    neurons_num=[100, 80, 40]
+    )
 
-print(encoder_decoder)
+#print(encoder_decoder)
 
 encoder_decoder.to(device)
 
