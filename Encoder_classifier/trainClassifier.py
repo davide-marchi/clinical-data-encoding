@@ -30,7 +30,7 @@ batch_size = 100
 learning_rate = 0.002
 plot = False
 weight_decay = 0.5e-5
-num_epochs = 300
+num_epochs = 50
 
 print(f'Number of binary columns: {binary_clumns}')
 print(f'Total number of columns: {tr_data.shape[1]/2}')
@@ -38,18 +38,18 @@ print(f'Learning rate: {learning_rate}')
 print(f'Weight decay: {weight_decay}')
 print(f'Number of epochs: {num_epochs}')
 
-#encoder_decoder:IMEO = torch.load('./Encoder_classifier/encoder_decoder.pth')
+encoder_decoder:IMEO = torch.load('./Encoder_classifier/encoder_decoder.pth')
 
-#encoder_decoder.to(device)
+encoder_decoder.to(device)
 
 # Train the network
 train_data = tr_data.to(device)
 val_data = val_data.to(device)
 data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
-#embedding_dim = encoder_decoder.encoder[-2].out_features
+embedding_dim = encoder_decoder.encoder[-2].out_features
 
-classifier = ClassifierBinary(inputSize=train_data.shape[1])
+classifier = ClassifierBinary(inputSize=embedding_dim)
 
 classifier.to(device)
 history = classifier.fit(train_data, 
@@ -60,7 +60,7 @@ history = classifier.fit(train_data,
                          device=device, 
                          num_epochs=num_epochs, 
                          batch_size=batch_size, 
-                         #preprocess=encoder_decoder.encode
+                         preprocess=encoder_decoder.encode
                          )
 
 print('\n\nModel Trained\n\n')
