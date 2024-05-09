@@ -76,7 +76,8 @@ history = encoder_decoder.fit(train_data,
                     batch_size=batch_size,
                     binary_loss_weight=binary_loss_weight,
                     print_every=num_epochs//5,
-                    plot=plot
+                    plot=plot,
+                    masked_percentage = 0.5
                 )
 print('\n\nModel Trained\n\n')
 print('Saving model...')

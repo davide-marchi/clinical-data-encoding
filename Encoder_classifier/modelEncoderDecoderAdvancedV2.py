@@ -135,6 +135,11 @@ class IMEO(nn.Module):
         '''
         x = batch
         val, mask = torch.chunk(x, 2, dim=1)
+        # mask input
+        x = torch.where(mask == 1, val, 0)
+        # return to original mask (mask*mask)
+        mask = torch.mul(mask, mask)
+        # cook target values with original mask TODO: this doesn't work: mat1 and mat2 shapes cannot be multiplied (100x68 and 136x100)
         y_hat = torch.mul(self(x), mask)
         y = torch.mul(val, mask)
         if self.total_binary_columns == 0 or forceMSE:
@@ -174,6 +179,12 @@ class IMEO(nn.Module):
     def unfreeze(self):
         for param in self.parameters():
             param.requires_grad = True
+            
+    def mask_imputation_step(self, batch:torch.Tensor, masked_percentage:float = 0.5):
+        batch = batch.clone()
+        val, mask = torch.chunk(batch, 2, dim=1)
+        imputation_mask = torch.where((torch.rand_like(mask) < masked_percentage) & (mask == 1.0), torch.tensor(-1.0), mask) 
+        return torch.cat((val, imputation_mask), dim=1)
 
     def fit(self,
             train_data:torch.Tensor, 
@@ -186,12 +197,15 @@ class IMEO(nn.Module):
             print_every:int = 200,
             plot:bool = True,
             metrics:list = ['tr_loss', 'val_loss', 'val_r2', 'val_acc', 'val_a2'],
+            masked_percentage:float = 0.0
         ) -> dict:
         binary_loss_weight = self.total_binary_columns / (self.inputSize // 2) if binary_loss_weight is None else binary_loss_weight
         data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
         metrics_hystory = {metric:[] for metric in metrics}
         for i in range(num_epochs):
             for batch in data_loader:
+                # fancy imputation stuff
+                batch = self.mask_imputation_step(batch, masked_percentage)
                 optimizer.zero_grad()
                 batch = batch.to(device)
                 loss = self.training_step(batch, binaryLossWeight=binary_loss_weight)
