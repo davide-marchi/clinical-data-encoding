@@ -8,7 +8,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 import torch
 import torch.nn as nn
 import torch.utils
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from torcheval.metrics.functional import binary_accuracy
 
 from utilsData import dataset_loader
