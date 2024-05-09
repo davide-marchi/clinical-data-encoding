@@ -29,8 +29,8 @@ binary_clumns = dict['bin_col']
 batch_size = 100
 learning_rate = 0.002
 plot = False
-weight_decay = 0.5e-5
-num_epochs = 50
+weight_decay = 0.8e-5
+num_epochs = 20
 
 print(f'Number of binary columns: {binary_clumns}')
 print(f'Total number of columns: {tr_data.shape[1]/2}')
@@ -60,7 +60,8 @@ history = classifier.fit(train_data,
                          device=device, 
                          num_epochs=num_epochs, 
                          batch_size=batch_size, 
-                         preprocess=encoder_decoder.encode
+                         preprocess=encoder_decoder.encode,
+                         print_every=num_epochs//10,
                          )
 
 print('\n\nModel Trained\n\n')

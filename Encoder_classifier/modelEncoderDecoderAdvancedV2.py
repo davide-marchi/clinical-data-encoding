@@ -74,11 +74,13 @@ class IMEO(nn.Module):
         x = torch.cat((x1, x2), dim=1)
         return x
     
-    def encode(self, x):
+    def encode(self, x, mask_for_imputation:bool = False):
         '''
         x: tensor of shape (batch_size, inputSize)
         return: tensor of shape (batch_size, embedding_dim)
         '''
+        if mask_for_imputation:
+            x = self.set_mask_for_imputation(x)
         return self.encoder(x)
     
     def compute_r_squared(self, batch, binCol: int = 0):
@@ -139,7 +141,8 @@ class IMEO(nn.Module):
         x = torch.where(mask == 1, val, 0)
         # return to original mask (mask*mask)
         mask = torch.mul(mask, mask)
-        # cook target values with original mask TODO: this doesn't work: mat1 and mat2 shapes cannot be multiplied (100x68 and 136x100)
+        x = torch.cat((x, mask), dim=1)
+        # cook target values with original mask
         y_hat = torch.mul(self(x), mask)
         y = torch.mul(val, mask)
         if self.total_binary_columns == 0 or forceMSE:
@@ -185,6 +188,12 @@ class IMEO(nn.Module):
         val, mask = torch.chunk(batch, 2, dim=1)
         imputation_mask = torch.where((torch.rand_like(mask) < masked_percentage) & (mask == 1.0), torch.tensor(-1.0), mask) 
         return torch.cat((val, imputation_mask), dim=1)
+    
+    def set_mask_for_imputation(self, batch:torch.Tensor):
+        batch = batch.clone()
+        val, mask = torch.chunk(batch, 2, dim=1)
+        mask = mask*2 - 1
+        return torch.cat((val, mask), dim=1)
 
     def fit(self,
             train_data:torch.Tensor, 
@@ -211,17 +220,18 @@ class IMEO(nn.Module):
                 loss = self.training_step(batch, binaryLossWeight=binary_loss_weight)
                 loss.backward()
                 optimizer.step()
+            val_masked = self.mask_imputation_step(val_data, masked_percentage)
             for metric in metrics:
                 if metric == 'tr_loss':
                     metrics_hystory[metric].append(self.training_step(train_data).item())
                 elif metric == 'val_loss':
-                    metrics_hystory[metric].append(self.training_step(val_data).item())
+                    metrics_hystory[metric].append(self.training_step(val_masked).item())
                 elif metric == 'val_r2':
-                    metrics_hystory[metric].append(self.compute_r_squared(val_data, self.total_binary_columns))
+                    metrics_hystory[metric].append(self.compute_r_squared(val_masked, self.total_binary_columns))
                 elif metric == 'val_acc':
-                    metrics_hystory[metric].append(self.compute_accuracy(val_data, self.total_binary_columns))
+                    metrics_hystory[metric].append(self.compute_accuracy(val_masked, self.total_binary_columns))
                 elif metric == 'val_a2':
-                    metrics_hystory[metric].append(self.weighted_measure(val_data, self.total_binary_columns))
+                    metrics_hystory[metric].append(self.weighted_measure(val_masked, self.total_binary_columns))
             if (print_every != 0):
                 with torch.no_grad():
                     print(f"Epoch [{i+1}/{num_epochs}]",

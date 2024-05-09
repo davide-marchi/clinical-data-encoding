@@ -30,8 +30,9 @@ batch_size = 100
 learning_rate = 0.002
 plot = True
 embedding_dim = 17
-weight_decay = 0.8e-5
+weight_decay = 0.2e-5
 num_epochs = 300
+masked_percentage = 0.1
 
 print(f'Number of binary columns: {binary_clumns}')
 print(f'Total number of columns: {tr_data.shape[1]/2}')
@@ -77,7 +78,7 @@ history = encoder_decoder.fit(train_data,
                     binary_loss_weight=binary_loss_weight,
                     print_every=num_epochs//5,
                     plot=plot,
-                    masked_percentage = 0.5
+                    masked_percentage = masked_percentage
                 )
 print('\n\nModel Trained\n\n')
 print('Saving model...')
