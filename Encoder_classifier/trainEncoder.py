@@ -32,7 +32,7 @@ plot = True
 embedding_dim = 17
 weight_decay = 0.2e-5
 num_epochs = 300
-masked_percentage = 0.1
+masked_percentage = 0.2
 
 print(f'Number of binary columns: {binary_clumns}')
 print(f'Total number of columns: {tr_data.shape[1]/2}')

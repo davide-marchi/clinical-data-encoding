@@ -220,18 +220,17 @@ class IMEO(nn.Module):
                 loss = self.training_step(batch, binaryLossWeight=binary_loss_weight)
                 loss.backward()
                 optimizer.step()
-            val_masked = self.mask_imputation_step(val_data, masked_percentage)
             for metric in metrics:
                 if metric == 'tr_loss':
                     metrics_hystory[metric].append(self.training_step(train_data).item())
                 elif metric == 'val_loss':
-                    metrics_hystory[metric].append(self.training_step(val_masked).item())
+                    metrics_hystory[metric].append(self.training_step(val_data).item())
                 elif metric == 'val_r2':
-                    metrics_hystory[metric].append(self.compute_r_squared(val_masked, self.total_binary_columns))
+                    metrics_hystory[metric].append(self.compute_r_squared(val_data, self.total_binary_columns))
                 elif metric == 'val_acc':
-                    metrics_hystory[metric].append(self.compute_accuracy(val_masked, self.total_binary_columns))
+                    metrics_hystory[metric].append(self.compute_accuracy(val_data, self.total_binary_columns))
                 elif metric == 'val_a2':
-                    metrics_hystory[metric].append(self.weighted_measure(val_masked, self.total_binary_columns))
+                    metrics_hystory[metric].append(self.weighted_measure(val_data, self.total_binary_columns))
             if (print_every != 0):
                 with torch.no_grad():
                     print(f"Epoch [{i+1}/{num_epochs}]",
