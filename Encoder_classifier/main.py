@@ -1,15 +1,19 @@
 from classifier import ClassifierBinary
 from modelEncoderDecoderAdvancedV2 import IMEO
 from itertools import product
+import matplotlib.pyplot as plt
 import torch
+import os
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilsData import dataset_loader, load_data
 
 # CLASSIFIER PARAMETERS
-batch_size = [100]
-learning_rate = [0.002]
-plot = [False]
-weight_decay = [0.8e-5]
-num_epochs = [20]
+batch_size = 100
+learning_rate = 0.002
+plot = False
+weight_decay = 0.8e-5
+num_epochs = 20
 
 # ENCODER PARAMETERS
 binary_loss_weight = 0.5
@@ -51,17 +55,18 @@ for embedding_dim, masked_percentage in product(embedding_dim_list, masked_perce
     # fit encoder
     encoder.fit(
         tr_data, 
-        tr_out, 
-        val_data, 
-        val_out, 
+        val_data,
+        optimizer = torch.optim.Adam(encoder.parameters(), weight_decay=weight_decay, lr=learning_rate),
+        device = device,
         binary_loss_weight = binary_loss_weight, 
-        batch_size = batch_size, 
-        learning_rate = learning_rate, 
-        plot = plot, 
-        weight_decay = weight_decay, 
+        batch_size = batch_size,
+        plot = plot,
         num_epochs = num_epochs, 
-        masked_percentage = masked_percentage
+        masked_percentage = masked_percentage,
     )
+    encoder.saveModel(f'./Encoder_classifier/Models/encoder_{embedding_dim}_{masked_percentage}.pth')
+    # we freeze the encoder
+    encoder.freeze()
     # create classifier
     classifier = ClassifierBinary(inputSize=embedding_dim)
     # fit classifier
@@ -77,5 +82,7 @@ for embedding_dim, masked_percentage in product(embedding_dim_list, masked_perce
         preprocess=encoder.encode,
         print_every=num_epochs//10,
     )
-    encoder.saveModel(f'./Encoder_classifier/encoder_{embedding_dim}_{masked_percentage}.pth')
-    classifier.saveModel(f'./Encoder_classifier/classifier_{embedding_dim}_{masked_percentage}.pth')
+    
+    classifier.saveModel(f'./Encoder_classifier/Models/classifier_{embedding_dim}_{masked_percentage}.pth')
+    
+    
