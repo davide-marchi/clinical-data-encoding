@@ -9,21 +9,21 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilsData import dataset_loader, load_data
 
 # CLASSIFIER PARAMETERS
-batch_size = 100
-learning_rate = 0.002
-plot = False
-weight_decay = 0.8e-5
-num_epochs = 20
+CL_batch_size = 100
+CL_learning_rate = 0.002
+CL_plot = False
+CL_weight_decay = 0.8e-5
+CL_num_epochs = 20
 
 # ENCODER PARAMETERS
-binary_loss_weight = 0.5
-batch_size = 100
-learning_rate = 0.002
-plot = True
-embedding_dim_list = [17]
-weight_decay = 0.2e-5
-num_epochs = 300
-masked_percentage_list = [0.2]
+EN_binary_loss_weight = 0.5
+EN_batch_size = 100
+EN_learning_rate = 0.002
+EN_plot = True
+EN_embedding_dim_list = [17]
+EN_weight_decay = 0.2e-5
+EN_num_epochs = 300
+EN_masked_percentage_list = [0.2]
 
 device = torch.device(  "cuda" if torch.cuda.is_available() 
                         else  "mps" if torch.backends.mps.is_available()
@@ -44,7 +44,7 @@ val_data = dict['val_data']
 val_out = dict['val_out']
 binary_clumns = dict['bin_col']
 
-for embedding_dim, masked_percentage in product(embedding_dim_list, masked_percentage_list):
+for embedding_dim, masked_percentage in product(EN_embedding_dim_list, EN_masked_percentage_list):
     # create encoder
     encoder = IMEO(
         inputSize=tr_data.shape[1], 
@@ -56,12 +56,12 @@ for embedding_dim, masked_percentage in product(embedding_dim_list, masked_perce
     encoder.fit(
         tr_data, 
         val_data,
-        optimizer = torch.optim.Adam(encoder.parameters(), weight_decay=weight_decay, lr=learning_rate),
+        optimizer = torch.optim.Adam(encoder.parameters(), weight_decay=EN_weight_decay, lr=EN_learning_rate),
         device = device,
-        binary_loss_weight = binary_loss_weight, 
-        batch_size = batch_size,
-        plot = plot,
-        num_epochs = num_epochs, 
+        binary_loss_weight = EN_binary_loss_weight, 
+        batch_size = EN_batch_size,
+        plot = EN_plot,
+        num_epochs = EN_num_epochs, 
         masked_percentage = masked_percentage,
     )
     encoder.saveModel(f'./Encoder_classifier/Models/encoder_{embedding_dim}_{masked_percentage}.pth')
@@ -75,12 +75,12 @@ for embedding_dim, masked_percentage in product(embedding_dim_list, masked_perce
         tr_out, 
         val_data, 
         val_out, 
-        optimizer=torch.optim.Adam(classifier.parameters(), lr=learning_rate), 
+        optimizer=torch.optim.Adam(classifier.parameters(), lr=CL_learning_rate), 
         device=device, 
-        num_epochs=num_epochs, 
-        batch_size=batch_size, 
+        num_epochs=CL_num_epochs, 
+        batch_size=CL_batch_size, 
         preprocess=encoder.encode,
-        print_every=num_epochs//10,
+        print_every=CL_num_epochs//10,
     )
     
     classifier.saveModel(f'./Encoder_classifier/Models/classifier_{embedding_dim}_{masked_percentage}.pth')
