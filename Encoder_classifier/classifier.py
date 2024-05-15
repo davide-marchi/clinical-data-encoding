@@ -38,10 +38,6 @@ class ClassifierBinary(nn.Module):
         output = output.squeeze()
         target = target.squeeze()
         return nn.functional.binary_cross_entropy(output, target)
-        print(f'x: {x.shape}')
-        print(f'y: {y.shape}')
-        y_hat = self(x)
-        return nn.functional.binary_cross_entropy(y_hat, y)
     
     def compute_accuracy(self, input:torch.Tensor, target:torch.Tensor) -> float:
         input = input.squeeze()

@@ -43,44 +43,47 @@ print(f'Embedding dimension: {embedding_dim}')
 print(f'Weight decay: {weight_decay}')
 print(f'Number of epochs: {num_epochs}')
 
-encoder_decoder = IMEO(
-    inputSize=tr_data.shape[1], 
-    total_binary_columns=binary_clumns, 
-    embedding_dim=embedding_dim,
-    neurons_num=[100, 80, 40]
-    )
+def train_encoder(binary_loss_weight = 0.5, batch_size = 100, learning_rate = 0.002, plot = True, embedding_dim = 17, weight_decay = 0.2e-5, num_epochs = 300, masked_percentage = 0.2):
+    encoder_decoder = IMEO(
+        inputSize=tr_data.shape[1], 
+        total_binary_columns=binary_clumns, 
+        embedding_dim=embedding_dim,
+        neurons_num=[100, 80, 40]
+        )
 
-#print(encoder_decoder)
+    #print(encoder_decoder)
 
-encoder_decoder.to(device)
+    encoder_decoder.to(device)
 
 
-optimizer = torch.optim.Adam(encoder_decoder.parameters(), 
-                             weight_decay=weight_decay, 
-                             lr=learning_rate)
+    optimizer = torch.optim.Adam(encoder_decoder.parameters(), 
+                                weight_decay=weight_decay, 
+                                lr=learning_rate)
 
-# Train the network
-losses_tr = []
-losses_val = []
-accuracy = [0]
-r_squared = []
-weighed_goodness = []
-train_data = tr_data.to(device)
-val_data = val_data.to(device)
-data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
+    # Train the network
+    losses_tr = []
+    losses_val = []
+    accuracy = [0]
+    r_squared = []
+    weighed_goodness = []
+    train_data = tr_data.to(device)
+    val_data = val_data.to(device)
+    data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
-history = encoder_decoder.fit(train_data,
-                    val_data,
-                    optimizer,
-                    device=device,
-                    num_epochs=num_epochs,
-                    batch_size=batch_size,
-                    binary_loss_weight=binary_loss_weight,
-                    print_every=num_epochs//5,
-                    plot=plot,
-                    masked_percentage = masked_percentage
-                )
-print('\n\nModel Trained\n\n')
-print('Saving model...')
-encoder_decoder.saveModel('./Encoder_classifier/encoder_decoder.pth')
-print('Model saved')
+    history = encoder_decoder.fit(train_data,
+                        val_data,
+                        optimizer,
+                        device=device,
+                        num_epochs=num_epochs,
+                        batch_size=batch_size,
+                        binary_loss_weight=binary_loss_weight,
+                        print_every=num_epochs//5,
+                        plot=plot,
+                        masked_percentage = masked_percentage
+                    )
+    print('\n\nModel Trained\n\n')
+    print('Saving model...')
+    encoder_decoder.saveModel('./Encoder_classifier/encoder_decoder.pth')
+    print('Model saved')
+    
+    return encoder_decoder
