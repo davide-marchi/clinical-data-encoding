@@ -10,7 +10,7 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 from utilsData import dataset_loader
-from classifier import BaseClassifier
+from BaseClassifier import BaseClassifier
 
 
 # Define hyperparameters
