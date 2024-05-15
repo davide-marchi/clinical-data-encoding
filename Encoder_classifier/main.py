@@ -8,6 +8,11 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilsData import dataset_loader, load_data
 
+# TODO: implement stopping condition in classifier.fit and encoder.fit
+
+# TODO: for plotting the 3D plot !!!!!see the link below!!!!subscribe to the channel
+# https://matplotlib.org/stable/gallery/mplot3d/contourf3d_2.html#sphx-glr-gallery-mplot3d-contourf3d-2-py
+
 # CLASSIFIER PARAMETERS
 CL_batch_size = 100
 CL_learning_rate = 0.002
