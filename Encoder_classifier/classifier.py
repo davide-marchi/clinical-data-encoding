@@ -50,7 +50,7 @@ class ClassifierBinary(nn.Module):
                 nn.init.kaiming_uniform_(m.weight)
                 nn.init.uniform_(m.bias, -0.5, 0.5)
 
-    def fit(self, train_data, tr_out, val_data, val_out, optimizer, device, num_epochs, batch_size, print_every=10, plot=True, preprocess= lambda x:x, early_stopping=0):
+    def fit(self, train_data, tr_out, val_data, val_out, optimizer, device, num_epochs, batch_size, print_every=10, plot=True, preprocess= lambda x:x, early_stopping=0)->tuple:
 
         train_losses = []
         val_losses = []
@@ -120,7 +120,7 @@ class ClassifierBinary(nn.Module):
                 
             if early_stopping > 0:
                 if epoch > early_stopping:
-                    if val_losses[-early_stopping] < val_losses[-1]:
+                    if val_losses[-early_stopping] < val_losses[-1]*0.999:
                         print(f"\nEarly stopping at epoch {epoch+1}")
                         break
 
@@ -143,7 +143,7 @@ class ClassifierBinary(nn.Module):
             plt.tight_layout()
             plt.show()
 
-        return train_losses, val_losses, train_accuracies, val_accuracies
+        return train_losses[-1], val_losses[-1], train_accuracies[-1].item(), val_accuracies[-1].item()
     
 class DatasetClassificator(TensorDataset):
     def __init__(self, data, target):

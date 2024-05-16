@@ -246,7 +246,7 @@ class IMEO(nn.Module):
                 
             if early_stopping > 0:
                 if i > early_stopping:
-                    if metrics_hystory['val_loss'][-early_stopping] < metrics_hystory['val_loss'][-1]:
+                    if metrics_hystory['val_loss'][-early_stopping] < metrics_hystory['val_loss'][-1]*0.999:
                         print(f"\nEarly stopping at epoch {i+1}")
                         break
                     
