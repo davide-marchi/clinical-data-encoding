@@ -25,16 +25,19 @@ class BaseClassifier(nn.Module):
         super().__init__()
         # Define the neural network architecture using nn.Sequential
         self.network = nn.Sequential(
-            nn.Linear(in_features=inputSize, out_features=110, bias=True),  # Input layer
-            nn.LeakyReLU(),  # Activation function
-            nn.BatchNorm1d(110),  # Batch normalization
-            nn.Linear(in_features=110, out_features=65, bias=True),  # Hidden layer
-            nn.LeakyReLU(),  # Activation function
-            nn.BatchNorm1d(65),  # Batch normalization
-            nn.Linear(in_features=65, out_features=23, bias=True),  # Hidden layer
-            nn.LeakyReLU(),  # Activation function
-            nn.BatchNorm1d(23),  # Batch normalization
-            nn.Linear(in_features=23, out_features=1, bias=True),  # Output layer
+            nn.Linear(in_features=inputSize, out_features=96, bias=True),  # Input layer
+            nn.Sigmoid(),  # Activation function
+            nn.BatchNorm1d(96),  # Batch normalization
+            nn.Dropout(p=0.4),
+            nn.Linear(in_features=96, out_features=59, bias=True),  # Hidden layer
+            nn.Sigmoid(),  # Activation function
+            nn.BatchNorm1d(59),  # Batch normalization
+            nn.Dropout(p=0.3),
+            nn.Linear(in_features=59, out_features=21, bias=True),  # Hidden layer
+            nn.Sigmoid(),  # Activation function
+            nn.BatchNorm1d(21),  # Batch normalization
+            nn.Dropout(p=0.3),
+            nn.Linear(in_features=21, out_features=1, bias=True),  # Output layer
             nn.Sigmoid()  # Activation function for binary classification
         )
         # Initialize weights and biases using Kaiming uniform initialization
@@ -76,30 +79,34 @@ class BaseClassifier(nn.Module):
 
         return loss
 
-    def train_model(self, train_loader, optimizer, device, num_epochs):
+    def fit_model(self, train_loader, val_loader, optimizer, device, num_epochs):
         """
-        Train the model using the provided data.
+        Train the model using the provided data and validate it.
 
         Args:
             train_loader (DataLoader): DataLoader for training data.
+            val_loader (DataLoader): DataLoader for validation data.
             optimizer: Optimizer used for training.
             device (torch.device): Device to run the training on (GPU or CPU).
             num_epochs (int): Number of training epochs.
 
         Returns:
-            list: List of training losses.
-            list: List of training accuracies.
+            tuple: Tuple containing lists of training losses, validation losses, training accuracies, and validation accuracies.
         """
         train_losses = []  # List to store training losses
+        val_losses = []  # List to store validation losses
         train_accuracies = []  # List to store training accuracies
+        val_accuracies = []  # List to store validation accuracies
 
         for epoch in range(num_epochs):
             self.train()  # Set the model to training mode
             
             epoch_train_loss = 0.0  # Initialize epoch training loss
+            epoch_val_loss = 0.0  # Initialize epoch validation loss
             epoch_train_accuracy = 0.0  # Initialize epoch training accuracy
+            epoch_val_accuracy = 0.0  # Initialize epoch validation accuracy
 
-            # Iterate over the training DataLoader
+            # Train the model
             for batch in train_loader:
                 x, y = batch
                 x = x.to(device)  # Move input data to the appropriate device
@@ -113,47 +120,44 @@ class BaseClassifier(nn.Module):
                 optimizer.step()  # Update the weights
 
                 epoch_train_loss += loss.item()  # Accumulate the loss
+                epoch_train_accuracy += self.compute_accuracy(y_hat, y)
+
+            # Validate the model
+            for batch in val_loader:
+                x_val, y_val = batch
+                x_val = x_val.to(device)
+                y_val = y_val.to(device)
+
+                with torch.no_grad():  # No need to compute gradients for validation
+                    y_val_hat = self.forward(x_val)  # Forward pass
+                    val_loss = self.binary_loss(y_val_hat, y_val)  # Compute the loss
+                    epoch_val_loss += val_loss.item()  # Accumulate the loss
+                    epoch_val_accuracy += self.compute_accuracy(y_val_hat, y_val)
+
+            # Calculate average training and validation losses
+            avg_train_loss = epoch_train_loss / len(train_loader)
+            avg_val_loss = epoch_val_loss / len(val_loader)
 
             # Calculate the accuracy for the epoch
-            epoch_train_accuracy = self.compute_accuracy(train_loader, device)
-
-            # Calculate the average loss for the epoch
-            avg_loss = epoch_train_loss / len(train_loader.dataset)    
+            epoch_train_accuracy /= len(train_loader)
+            epoch_val_accuracy /= len(val_loader) 
 
             # Print the epoch number and average loss
-            print(f'Epoch: {epoch}, Average Loss: {avg_loss}')
+            print(f'Epoch: {epoch}, Train Loss: {avg_train_loss}, Val Loss: {avg_val_loss}, Train Accuracy: {epoch_train_accuracy}, Val Accuracy: {epoch_val_accuracy}')
 
-            # Append the average loss and accuracy to the respective lists
-            train_losses.append(avg_loss)
+            # Append the average losses and accuracies to the respective lists
+            train_losses.append(avg_train_loss)
+            val_losses.append(avg_val_loss)
             train_accuracies.append(epoch_train_accuracy)
+            val_accuracies.append(epoch_val_accuracy)
 
-        return train_losses, train_accuracies
+        return train_losses, val_losses, train_accuracies, val_accuracies
 
     
-    def compute_accuracy(self, data_loader, device):
-        """
-        Compute the model accuracy on the data provided by the DataLoader.
-
-        Args:
-            data_loader (DataLoader): The DataLoader providing the data.
-            device (torch.device): The device to perform the computation on (GPU or CPU).
-
-        Returns:
-            float: The model accuracy.
-        """
-        self.eval()  # Set the model to evaluation mode
-
-        # Concatenate predictions and targets from all batches
-        all_y_hat = torch.cat([self.forward(x.to(device)).cpu() for x, _ in data_loader])
-        all_y = torch.cat([y for _, y in data_loader])
-
-        # Remove any unnecessary dimensions from predictions
-        all_y_hat = all_y_hat.squeeze()
-
-        # Calculate the accuracy using binary_accuracy function
-        accuracy = binary_accuracy(all_y_hat, all_y)
-
-        return accuracy
+    def compute_accuracy(self, input:torch.Tensor, target:torch.Tensor) -> float:
+        input = input.squeeze()
+        target = target.squeeze()
+        return binary_accuracy(input, target)
 
 
     def plot_loss(self, train_losses, val_losses=None, figsize=(8,6), print_every=1):
