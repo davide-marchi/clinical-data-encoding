@@ -1,23 +1,24 @@
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-
 import os
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
+
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 from utilsData import dataset_loader
 from BaseClassifier import BaseClassifier
 
 
 # Define hyperparameters
-LEARNING_RATE = 1e-05
-EPOCHS = 20
-TRAIN_BATCH_SIZE = 8
-VALID_BATCH_SIZE = 4
+LEARNING_RATE = 1e-04
+EPOCHS = 250
+TRAIN_BATCH_SIZE = 100
+VALID_BATCH_SIZE = 60
+WEIGHT_DECAY=1e-6
 
 # Define device (use "cpu" since the dataset is small)
 device = torch.device("cpu")
@@ -59,26 +60,26 @@ train_params = {
 }
 test_params = {
     'batch_size': VALID_BATCH_SIZE,  
-    'shuffle': True,  
+    'shuffle':True,  
     'num_workers': 0  
 }
 
 # Create DataLoader for train and validation sets
 train_dataset = TensorDataset(tr_data, tr_out)
 train_loader = DataLoader(train_dataset, **train_params)
-val_loader = DataLoader((val_data, val_out), **test_params)
-
+val_dataset = TensorDataset(val_data, val_out)
+val_loader = DataLoader(val_dataset, **test_params)
 # Initialize the model
 model = BaseClassifier(tr_data.shape[1])
 model.to(device)
 
 # Define optimizer
-optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 
 # Train the model
-train_loss, train_accuracy = model.train_model(train_loader, optimizer, device, EPOCHS)
+train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, device, EPOCHS)
 
 # Plot training loss and accuracy
-model.plot_loss(train_loss)
-model.plot_accuracy(train_accuracy)
+model.plot_loss(train_loss, val_loss)
+model.plot_accuracy(train_accuracy, val_accuracy)
 
