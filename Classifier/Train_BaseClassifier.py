@@ -15,10 +15,11 @@ from BaseClassifier import BaseClassifier
 
 # Define hyperparameters
 LEARNING_RATE = 1e-04
-EPOCHS = 250
-TRAIN_BATCH_SIZE = 100
-VALID_BATCH_SIZE = 60
+EPOCHS = 200
+TRAIN_BATCH_SIZE = 50
+VALID_BATCH_SIZE = 25
 WEIGHT_DECAY=1e-6
+GAMMA=0
 
 # Define device (use "cpu" since the dataset is small)
 device = torch.device("cpu")
@@ -75,9 +76,10 @@ model.to(device)
 
 # Define optimizer
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=GAMMA)
 
 # Train the model
-train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, device, EPOCHS)
+train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, scheduler, device, EPOCHS)
 
 # Plot training loss and accuracy
 model.plot_loss(train_loss, val_loss)

@@ -14,11 +14,12 @@ from utilsData import dataset_loader
 from BaseClassifier import BaseClassifier
 
 # Definisci gli iperparametri da testare
-LEARNING_RATES = [1e-04]
-EPOCHS = [250]
-TRAIN_BATCH_SIZES = [100]
-VALID_BATCH_SIZES = [50]
-WEIGHT_DECAYS = [1e-6]
+LEARNING_RATES = [1e-04, 1e-03]
+EPOCHS = [200, 250]
+TRAIN_BATCH_SIZES = [100, 200]
+VALID_BATCH_SIZES = [50, 100]
+WEIGHT_DECAYS = [1e-6, 1e-5]
+GAMMA = [0, 0.1]
 
 # Define device (use "cpu" since the dataset is small)
 device = torch.device("cpu")
@@ -56,16 +57,25 @@ torch.manual_seed(42)
 results = []
 
 # Itera su tutte le combinazioni di iperparametri
-for lr, epochs, train_batch_size, valid_batch_size, weight_decay in itertools.product(LEARNING_RATES, EPOCHS, TRAIN_BATCH_SIZES, VALID_BATCH_SIZES, WEIGHT_DECAYS):
+for lr, epochs, train_batch_size, valid_batch_size, weight_decay, gamma in itertools.product(LEARNING_RATES, EPOCHS, TRAIN_BATCH_SIZES, VALID_BATCH_SIZES, WEIGHT_DECAYS, GAMMA):
+    
+    # Definisci il DataLoader per il training set
+    train_dataset = TensorDataset(tr_data, tr_out)
+    train_loader = DataLoader(train_dataset, batch_size=train_batch_size, shuffle=True, num_workers=0)
+    
+    # Definisci il DataLoader per il validation set
+    val_dataset = TensorDataset(val_data, val_out)
+    val_loader = DataLoader(val_dataset, batch_size=valid_batch_size, shuffle=True, num_workers=0)
+    
     # Definisci il modello
     model = BaseClassifier(tr_data.shape[1])  # Assicurati di sostituire input_size con il valore corretto
     
     # Definisci ottimizzatore e scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)  # Esempio di scheduler
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=)  # Esempio di scheduler
     
     # Addestra il modello
-    train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, device, epochs, scheduler)
+    train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, scheduler, device, epochs)
     
     # Calcola la media della val_loss finale
     final_val_loss = val_loss[-1]

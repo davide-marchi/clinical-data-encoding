@@ -79,7 +79,7 @@ class BaseClassifier(nn.Module):
 
         return loss
 
-    def fit_model(self, train_loader, val_loader, optimizer, device, num_epochs):
+    def fit_model(self, train_loader, val_loader, optimizer, scheduler, device, num_epochs):
         """
         Train the model using the provided data and validate it.
 
@@ -87,6 +87,7 @@ class BaseClassifier(nn.Module):
             train_loader (DataLoader): DataLoader for training data.
             val_loader (DataLoader): DataLoader for validation data.
             optimizer: Optimizer used for training.
+            scheduler: Learning rate scheduler.
             device (torch.device): Device to run the training on (GPU or CPU).
             num_epochs (int): Number of training epochs.
 
@@ -133,6 +134,9 @@ class BaseClassifier(nn.Module):
                     val_loss = self.binary_loss(y_val_hat, y_val)  # Compute the loss
                     epoch_val_loss += val_loss.item()  # Accumulate the loss
                     epoch_val_accuracy += self.compute_accuracy(y_val_hat, y_val)
+            
+            # Step the scheduler
+            scheduler.step()
 
             # Calculate average training and validation losses
             avg_train_loss = epoch_train_loss / len(train_loader)
@@ -155,9 +159,24 @@ class BaseClassifier(nn.Module):
 
     
     def compute_accuracy(self, input:torch.Tensor, target:torch.Tensor) -> float:
+        """
+        Compute the accuracy of the model given input and target tensors.
+
+        Args:
+            input (torch.Tensor): Predicted output tensor.
+            target (torch.Tensor): Target tensor.
+
+        Returns:
+            float: The computed accuracy.
+        """
+        # Squeeze the tensors to remove any unnecessary dimensions
         input = input.squeeze()
         target = target.squeeze()
-        return binary_accuracy(input, target)
+        
+        # Calculate the accuracy using the binary_accuracy function
+        accuracy = binary_accuracy(input, target)
+    
+        return accuracy
 
 
     def plot_loss(self, train_losses, val_losses=None, figsize=(8,6), print_every=1):
