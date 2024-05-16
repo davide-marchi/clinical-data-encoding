@@ -206,7 +206,8 @@ class IMEO(nn.Module):
             print_every:int = 200,
             plot:bool = True,
             metrics:list = ['tr_loss', 'val_loss', 'val_r2', 'val_acc', 'val_a2'],
-            masked_percentage:float = 0.0
+            masked_percentage:float = 0.0,
+            early_stopping:int = 0
         ) -> dict:
         binary_loss_weight = self.total_binary_columns / (self.inputSize // 2) if binary_loss_weight is None else binary_loss_weight
         data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
@@ -242,6 +243,13 @@ class IMEO(nn.Module):
                     "      ", end='\r')
             if print_every != 0 and i % print_every == 0:
                 print('')
+                
+            if early_stopping > 0:
+                if i > early_stopping:
+                    if metrics_hystory['val_loss'][-early_stopping] < metrics_hystory['val_loss'][-1]:
+                        print(f"\nEarly stopping at epoch {i+1}")
+                        break
+                    
         print('\nTraining complete\t\t\t\t')
         if plot:
             import matplotlib.pyplot as plt

@@ -51,6 +51,8 @@ embedding_dim = encoder_decoder.encoder[-2].out_features
 
 classifier = ClassifierBinary(inputSize=embedding_dim)
 
+patience = 10
+
 classifier.to(device)
 history = classifier.fit(train_data, 
                          tr_out, 
@@ -62,6 +64,7 @@ history = classifier.fit(train_data,
                          batch_size=batch_size, 
                          preprocess=encoder_decoder.encode,
                          print_every=num_epochs//10,
+                         early_stopping=patience
                          )
 
 print('\n\nModel Trained\n\n')

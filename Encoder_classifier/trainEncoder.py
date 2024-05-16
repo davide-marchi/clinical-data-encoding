@@ -69,6 +69,8 @@ train_data = tr_data.to(device)
 val_data = val_data.to(device)
 data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
+patience = 10
+
 history = encoder_decoder.fit(train_data,
                     val_data,
                     optimizer,
@@ -78,7 +80,8 @@ history = encoder_decoder.fit(train_data,
                     binary_loss_weight=binary_loss_weight,
                     print_every=num_epochs//5,
                     plot=plot,
-                    masked_percentage = masked_percentage
+                    masked_percentage = masked_percentage,
+                    early_stopping=patience
                 )
 print('\n\nModel Trained\n\n')
 print('Saving model...')

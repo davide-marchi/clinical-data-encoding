@@ -50,7 +50,7 @@ class ClassifierBinary(nn.Module):
                 nn.init.kaiming_uniform_(m.weight)
                 nn.init.uniform_(m.bias, -0.5, 0.5)
 
-    def fit(self, train_data, tr_out, val_data, val_out, optimizer, device, num_epochs, batch_size, print_every=10, plot=True, preprocess= lambda x:x):
+    def fit(self, train_data, tr_out, val_data, val_out, optimizer, device, num_epochs, batch_size, print_every=10, plot=True, preprocess= lambda x:x, early_stopping=0):
 
         train_losses = []
         val_losses = []
@@ -117,6 +117,12 @@ class ClassifierBinary(nn.Module):
 
             if (epoch + 1) % print_every == 0:
                 print(f"Epoch {epoch+1}/{num_epochs}: Train Loss: {epoch_train_loss:.4f}, Val Loss: {epoch_val_loss:.4f}, Train Accuracy: {epoch_train_accuracy:.4f}, Val Accuracy: {epoch_val_accuracy:.4f}")
+                
+            if early_stopping > 0:
+                if epoch > early_stopping:
+                    if val_losses[-early_stopping] < val_losses[-1]:
+                        print(f"\nEarly stopping at epoch {epoch+1}")
+                        break
 
         if plot:
             plt.figure(figsize=(12, 4))
