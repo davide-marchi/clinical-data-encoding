@@ -75,7 +75,7 @@ def tune_jointly(imeo:IMEO, classifier:ClassifierBinary,
         history['val_acc'].append(epoch_val_accuracy / len(val_loader))
 
         if (epoch + 1) % print_time == 0:
-                print(f"Epoch {epoch+1}/{ep}: Train Loss: {epoch_train_loss:.4f}, Val Loss: {epoch_val_loss:.4f}, Train Accuracy: {epoch_train_accuracy:.4f}, Val Accuracy: {epoch_val_accuracy/len(val_loader):.4f}")
+            print(f"Epoch {epoch+1}/{ep}: Train Loss: {epoch_train_loss:.4f}, Val Loss: {epoch_val_loss:.4f}, Train Accuracy: {epoch_train_accuracy:.4f}, Val Accuracy: {epoch_val_accuracy/len(val_loader):.4f}")
         
         #check stopping criteria
         if patience > 0:
