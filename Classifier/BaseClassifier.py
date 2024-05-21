@@ -156,6 +156,37 @@ class BaseClassifier(nn.Module):
             val_accuracies.append(epoch_val_accuracy)
 
         return train_losses, val_losses, train_accuracies, val_accuracies
+    
+    def test_model(self, test_loader, device):
+        """
+        Test the model using the provided data.
+
+        Args:
+            test_loader (DataLoader): DataLoader for test data.
+            device (torch.device): Device to run the testing on (GPU or CPU).
+
+        Returns:
+            tuple: Tuple containing lists of predictions and true targets.
+        """
+        self.eval()  # Set the model to evaluation mode
+        
+        predictions = []  # List to store predictions
+        true_targets = []  # List to store true targets
+        
+        # Test the model
+        with torch.no_grad():  # No need to compute gradients for testing
+            for batch in test_loader:
+                x_test, y_test = batch
+                x_test = x_test.to(device)  # Move input data to the appropriate device
+                y_test = y_test.to(device)  # Move target data to the appropriate device
+
+                y_test_hat = self.forward(x_test)  # Forward pass
+                preds = torch.round(y_test_hat)  # Round the predictions to get binary output
+
+                predictions.extend(preds.cpu().numpy())  # Move predictions to CPU and convert to numpy array
+                true_targets.extend(y_test.cpu().numpy())  # Move true targets to CPU and convert to numpy array
+
+        return predictions, true_targets
 
     
     def compute_accuracy(self, input:torch.Tensor, target:torch.Tensor) -> float:
@@ -177,51 +208,6 @@ class BaseClassifier(nn.Module):
         accuracy = binary_accuracy(input, target)
     
         return accuracy
-
-
-    def plot_loss(self, train_losses, val_losses=None, figsize=(8,6), print_every=1):
-        """
-        Plot training and validation losses.
-
-        Args:
-            train_losses (list): List of training losses.
-            val_losses (list): List of validation losses (optional).
-            figsize (tuple): Size of the figure.
-            print_every (int): Interval for printing training progress.
-        """
-        epochs = range(1, len(train_losses) + 1)
-        plt.figure(figsize=figsize)
-        plt.plot(epochs, train_losses, label='Train Loss')
-        if val_losses:
-            plt.plot(epochs, val_losses, label='Val Loss')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.title('Training and Validation Losses')
-        plt.legend()
-        plt.xticks(epochs[::print_every])
-        plt.show()
-
-    def plot_accuracy(self, train_accuracies, val_accuracies=None, figsize=(8,6), print_every=1):
-        """
-        Plot training and validation accuracies.
-
-        Args:
-            train_accuracies (list): List of training accuracies.
-            figsize (tuple): Size of the figure.
-            val_accuracies (list): List of validation accuracies (optional).
-            print_every (int): Interval for printing training progress.
-        """
-        epochs = range(1, len(train_accuracies) + 1)
-        plt.figure(figsize=figsize)
-        plt.plot(epochs, train_accuracies, label='Train Accuracy')
-        if val_accuracies:
-            plt.plot(epochs, val_accuracies, label='Val Accuracy')
-        plt.xlabel('Epoch')
-        plt.ylabel('Accuracy')
-        plt.title('Training and Validation Accuracies')
-        plt.legend()
-        plt.xticks(epochs[::print_every])
-        plt.show()
     
     def reset(self):
         """

@@ -14,10 +14,10 @@ from utilsData import dataset_loader
 from BaseClassifier import BaseClassifier
 
 # Definisci gli iperparametri da testare
-LEARNING_RATES = [1e-04, 1e-03]
+LEARNING_RATES = [1e-04, 1e-05]
 EPOCHS = [200, 250]
-TRAIN_BATCH_SIZES = [100, 200]
-VALID_BATCH_SIZES = [50, 100]
+TRAIN_BATCH_SIZES = [50]
+VALID_BATCH_SIZES = [25]
 WEIGHT_DECAYS = [1e-6, 1e-5]
 GAMMA = [0, 0.1]
 
@@ -72,13 +72,14 @@ for lr, epochs, train_batch_size, valid_batch_size, weight_decay, gamma in itert
     
     # Definisci ottimizzatore e scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=)  # Esempio di scheduler
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=gamma)  # Esempio di scheduler
     
     # Addestra il modello
     train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, scheduler, device, epochs)
     
     # Calcola la media della val_loss finale
     final_val_loss = val_loss[-1]
+    final_val_accuracy = val_accuracy[-1]
     
     # Memorizza i risultati della ricerca a griglia
     results.append({
@@ -87,11 +88,13 @@ for lr, epochs, train_batch_size, valid_batch_size, weight_decay, gamma in itert
         'train_batch_size': train_batch_size,
         'valid_batch_size': valid_batch_size,
         'weight_decay': weight_decay,
-        'final_val_loss': final_val_loss
+        'gamma': gamma,
+        'final_val_loss': final_val_loss,
+        'final_val_accuracy': final_val_accuracy
     })
 
 # Trova la configurazione migliore
-best_config = min(results, key=lambda x: x['final_val_loss'])
+best_config = max(results, key=lambda x: x['final_val_accuracy'])
 
 # Stampare la configurazione migliore
 print("Best Configuration:")
