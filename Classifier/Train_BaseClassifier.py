@@ -11,6 +11,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 from utilsData import dataset_loader
 from BaseClassifier import BaseClassifier
+from Evaluation_Metrics import plot_accuracy, plot_loss, plot_c_matrix, report_scores
 
 
 # Define hyperparameters
@@ -70,6 +71,9 @@ train_dataset = TensorDataset(tr_data, tr_out)
 train_loader = DataLoader(train_dataset, **train_params)
 val_dataset = TensorDataset(val_data, val_out)
 val_loader = DataLoader(val_dataset, **test_params)
+test_dataset=TensorDataset(test_data, test_out)
+test_loader = DataLoader(test_dataset, **test_params)
+
 # Initialize the model
 model = BaseClassifier(tr_data.shape[1])
 model.to(device)
@@ -82,6 +86,10 @@ scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=GAMMA
 train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, scheduler, device, EPOCHS)
 
 # Plot training loss and accuracy
-model.plot_loss(train_loss, val_loss)
-model.plot_accuracy(train_accuracy, val_accuracy)
+plot_loss(train_losses=train_loss, val_losses=val_loss)
+plot_accuracy(train_accuracies=train_accuracy, val_accuracies=val_accuracy)
 
+test_prediction, test_target = model.test_model(test_loader, device)
+
+report_scores(test_target, test_prediction)
+plot_c_matrix(test_target, test_prediction, "Base Classifier")
