@@ -79,7 +79,7 @@ for lr, epochs, train_batch_size, valid_batch_size, weight_decay, gamma in itert
     
     # Calcola la media della val_loss finale
     final_val_loss = val_loss[-1]
-    final_accuracy = val_accuracy[-1]
+    final_val_accuracy = val_accuracy[-1]
     
     # Memorizza i risultati della ricerca a griglia
     results.append({
@@ -90,11 +90,11 @@ for lr, epochs, train_batch_size, valid_batch_size, weight_decay, gamma in itert
         'weight_decay': weight_decay,
         'gamma': gamma,
         'final_val_loss': final_val_loss,
-        'accuracy': final_accuracy
+        'final_val_accuracy': final_val_accuracy
     })
 
 # Trova la configurazione migliore
-best_config = min(results, key=lambda x: x['final_val_loss'])
+best_config = max(results, key=lambda x: x['final_val_loss'])
 
 # Stampare la configurazione migliore
 print("Best Configuration:")
