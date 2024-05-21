@@ -14,11 +14,11 @@ from utilsData import dataset_loader
 from BaseClassifier import BaseClassifier
 
 # Definisci gli iperparametri da testare
-LEARNING_RATES = [1e-04]
-EPOCHS = [200]
+LEARNING_RATES = [1e-04, 1e-05]
+EPOCHS = [200, 250]
 TRAIN_BATCH_SIZES = [50]
 VALID_BATCH_SIZES = [25]
-WEIGHT_DECAYS = [1e-6]
+WEIGHT_DECAYS = [1e-6, 1e-5]
 GAMMA = [0, 0.1]
 
 # Define device (use "cpu" since the dataset is small)
@@ -94,7 +94,7 @@ for lr, epochs, train_batch_size, valid_batch_size, weight_decay, gamma in itert
     })
 
 # Trova la configurazione migliore
-best_config = max(results, key=lambda x: x['final_val_loss'])
+best_config = max(results, key=lambda x: x['final_val_accuracy'])
 
 # Stampare la configurazione migliore
 print("Best Configuration:")
