@@ -26,17 +26,17 @@ class BaseClassifier(nn.Module):
         # Define the neural network architecture using nn.Sequential
         self.network = nn.Sequential(
             nn.Linear(in_features=inputSize, out_features=96, bias=True),  # Input layer
-            nn.Sigmoid(),  # Activation function
+            nn.Tanh(),  # Activation function
             nn.BatchNorm1d(96),  # Batch normalization
-            nn.Dropout(p=0.4),
+            #nn.Dropout(p=0.4),
             nn.Linear(in_features=96, out_features=59, bias=True),  # Hidden layer
-            nn.Sigmoid(),  # Activation function
+            nn.Tanh(),  # Activation function
             nn.BatchNorm1d(59),  # Batch normalization
-            nn.Dropout(p=0.3),
+            #nn.Dropout(p=0.3),
             nn.Linear(in_features=59, out_features=21, bias=True),  # Hidden layer
-            nn.Sigmoid(),  # Activation function
+            nn.Tanh(),  # Activation function
             nn.BatchNorm1d(21),  # Batch normalization
-            nn.Dropout(p=0.3),
+            #nn.Dropout(p=0.3),
             nn.Linear(in_features=21, out_features=1, bias=True),  # Output layer
             nn.Sigmoid()  # Activation function for binary classification
         )

@@ -15,11 +15,11 @@ from Evaluation_Metrics import plot_accuracy, plot_loss, plot_c_matrix, report_s
 
 
 # Define hyperparameters
-LEARNING_RATE = 1e-04
-EPOCHS = 200
-TRAIN_BATCH_SIZE = 50
-VALID_BATCH_SIZE = 25
-WEIGHT_DECAY=1e-6
+LEARNING_RATE = 0.00005
+EPOCHS = 300
+TRAIN_BATCH_SIZE = 75
+VALID_BATCH_SIZE = 35
+WEIGHT_DECAY=0
 GAMMA=0
 
 # Define device (use "cpu" since the dataset is small)

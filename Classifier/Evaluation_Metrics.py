@@ -20,7 +20,7 @@ def plot_c_matrix(test_label, test_pred, classifier_name):
         None
     """
     # Compute the confusion matrix and create a ConfusionMatrixDisplay object
-    cm = confusion_matrix(test_label, test_pred)
+    cm = confusion_matrix(test_label, test_pred, normalize="true")
     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
     
     disp.plot()
