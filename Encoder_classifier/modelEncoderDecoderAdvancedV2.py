@@ -83,9 +83,6 @@ class IMEO(nn.Module):
         x: tensor of shape (batch_size, inputSize)
         return: tensor of shape (batch_size, inputSize//2)
         '''
-        # così è buono
-        if self.imputation:
-            x = self.set_mask_for_imputation(x)
         x = self.encoder(x)
         x = self.decoder(x)
         x1 = self.binActivation(self.binaOut(x))
@@ -93,13 +90,11 @@ class IMEO(nn.Module):
         x = torch.cat((x1, x2), dim=1)
         return x
     
-    def encode(self, x, mask_for_imputation:bool = False):
+    def encode(self, x):
         '''
         x: tensor of shape (batch_size, inputSize)
         return: tensor of shape (batch_size, embedding_dim)
         '''
-        if mask_for_imputation:
-            x = self.set_mask_for_imputation(x)
         return self.encoder(x)
     
     def compute_r_squared(self, batch, binCol: int = 0):
@@ -147,23 +142,17 @@ class IMEO(nn.Module):
         binWeight = binCol / (self.inputSize // 2)
         return acc * binWeight + r2 * (1 - binWeight)
     
-    def training_step(self, batch, binaryLossWeight: float = 0.5, forceMSE: bool = False):
+    def training_step(self, batch, imputation_batch, binaryLossWeight: float = 0.5, forceMSE: bool = False):
         '''
         batch: tensor of shape (batch_size, inputSize)
         binaryLossWeight: float the weight of the binary loss in the total loss (0 <= binaryLossWeight <= 1)
             the weight of the continuous loss will be 1 - binaryLossWeight
         return: the total loss
         '''
-        x = batch
-        val, mask = torch.chunk(x, 2, dim=1)
-        # mask input
-        x = torch.where(mask == 1, val, 0)
-        # return to original mask (mask*mask) WITHOUT IMPUTATION, WITHOUT -1
-        mask = torch.mul(mask, mask)
-        x = torch.cat((x, mask), dim=1)
-        # cook target values with original NON IMPUTED, 0/1 mask
-        y_hat = torch.mul(self(x), mask)
-        y = torch.mul(val, mask)
+        x = imputation_batch
+        original_val, missing_mask = torch.chunk(batch, 2, dim=1)
+        y_hat = torch.mul(self(x), missing_mask)
+        y = torch.mul(original_val, missing_mask)
         if self.total_binary_columns == 0 or forceMSE:
             return nn.functional.mse_loss(y, y_hat)
         y_hat_bin = y_hat[:, :self.total_binary_columns]
@@ -201,19 +190,15 @@ class IMEO(nn.Module):
     def unfreeze(self):
         for param in self.parameters():
             param.requires_grad = True
-            
+              
+    # sets imputation values to 0
     def mask_imputation_step(self, batch:torch.Tensor, masked_percentage:float = 0.5):
         batch = batch.clone()
         val, mask = torch.chunk(batch, 2, dim=1)
-        imputation_mask = torch.where((torch.rand_like(mask) < masked_percentage) & (mask == 1.0), torch.tensor(-1.0), mask) 
+        imputation_mask = torch.where((torch.rand_like(mask) < masked_percentage) & (mask == 1.0), torch.tensor(0.0), mask) 
+        # important set to 0 imputation elements in the val part too
+        val = torch.mul(val, imputation_mask)
         return torch.cat((val, imputation_mask), dim=1)
-
-    # simply zeros become -1. 
-    def set_mask_for_imputation(self, batch:torch.Tensor):
-        batch = batch.clone()
-        val, mask = torch.chunk(batch, 2, dim=1)
-        mask = mask*2 - 1
-        return torch.cat((val, mask), dim=1)
 
     def fit(self,
             train_data:torch.Tensor, 
@@ -230,24 +215,25 @@ class IMEO(nn.Module):
             early_stopping:int = 0
         ) -> dict:
         
-        self.imputation = masked_percentage != 0
+        
         binary_loss_weight = self.total_binary_columns / (self.inputSize // 2) if binary_loss_weight is None else binary_loss_weight
         data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
         metrics_hystory = {metric:[] for metric in metrics}
         for i in range(num_epochs):
             for batch in data_loader:
                 # fancy imputation stuff
-                batch = self.mask_imputation_step(batch, masked_percentage)
+                imputation_batch = self.mask_imputation_step(batch, masked_percentage)
                 optimizer.zero_grad()
                 batch = batch.to(device)
-                loss = self.training_step(batch, binaryLossWeight=binary_loss_weight)
+                imputation_batch = imputation_batch.to(device)
+                loss = self.training_step(batch, imputation_batch, binaryLossWeight=binary_loss_weight)
                 loss.backward()
                 optimizer.step()
             for metric in metrics:
                 if metric == 'tr_loss':
-                    metrics_hystory[metric].append(self.training_step(train_data).item())
+                    metrics_hystory[metric].append(self.training_step(train_data,train_data).item())
                 elif metric == 'val_loss':
-                    metrics_hystory[metric].append(self.training_step(val_data).item())
+                    metrics_hystory[metric].append(self.training_step(val_data,val_data).item())
                 elif metric == 'val_r2':
                     metrics_hystory[metric].append(self.compute_r_squared(val_data, self.total_binary_columns))
                 elif metric == 'val_acc':

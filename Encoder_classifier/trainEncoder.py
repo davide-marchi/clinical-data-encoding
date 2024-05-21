@@ -10,7 +10,7 @@ device = torch.device(  "cuda" if torch.cuda.is_available()
                         else "cpu"
                     )
 #we have small amount of data, so we will use cpu (looks faster)
-device = torch.device("cpu")
+device = torch.device("cuda")
 print("Device: ", device)
 
 folderName = './Datasets/Cleaned_Dataset/'
@@ -26,7 +26,7 @@ binary_clumns = dict['bin_col']
 
 
 binary_loss_weight = binary_clumns/(tr_data.shape[1]//2)
-batch_size = 100
+batch_size = 300
 learning_rate = 0.002
 plot = True
 embedding_dim = 17
