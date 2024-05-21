@@ -46,9 +46,9 @@ print(f'Number of epochs: {num_epochs}')
 encoder_decoder = IMEO(
     inputSize=tr_data.shape[1], 
     total_binary_columns=binary_clumns, 
-    embedding_dim=embedding_dim,
-    neurons_num=[100, 80, 40]
+    embedding_percentage=25.0
     )
+
 
 #print(encoder_decoder)
 
