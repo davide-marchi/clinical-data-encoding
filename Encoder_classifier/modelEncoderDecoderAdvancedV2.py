@@ -7,7 +7,7 @@ torch.manual_seed(42)
 # TODO: add num_layers and manage dinamically construction of the encoder and decoder
 
 class IMEO(nn.Module):
-    def __init__(self, inputSize:int, total_binary_columns: int = 0, embedding_percentage: float = 25.0):
+    def __init__(self, inputSize:int, total_binary_columns: int = 0, embedding_percentage: float = 0.25):
         '''
         inputSize: int the number of data columns + mask columns (should be an even number)
         total_binary_columns: int the number of binary columns in the data (binary data should be the first columns)
@@ -17,12 +17,12 @@ class IMEO(nn.Module):
         self.total_binary_columns = total_binary_columns
         self.inputSize = inputSize
         self.imputation = None
-        embedding_dim = int(inputSize * embedding_percentage / 200) # 25% of HALF of the input size (mask is not counted)
+        self.embedding_dim = int(inputSize * embedding_percentage / 2) # 25% of HALF of the input size (mask is not counted)
         neurons_num = []
         # TODO: here range 3 is number of layers - 1 and 4 is the number of layers
         for i in range(3):
             #                                      difference of neurons between each layer
-            neurons_num.append(int(inputSize - (i+1)*((inputSize - embedding_dim) / 4)))
+            neurons_num.append(int(inputSize - (i+1)*((inputSize - self.embedding_dim) / 4)))
         # TODO: make a for with encoder.append or encoder.add_module 
         self.encoder = nn.Sequential(
             nn.Linear(in_features=inputSize, out_features=neurons_num[0], bias=True),
@@ -34,13 +34,13 @@ class IMEO(nn.Module):
             nn.Linear(in_features=neurons_num[1], out_features=neurons_num[2], bias=True),
             nn.LeakyReLU(),
             nn.BatchNorm1d(neurons_num[2]),
-            nn.Linear(in_features=neurons_num[2], out_features=embedding_dim, bias=True),
+            nn.Linear(in_features=neurons_num[2], out_features=self.embedding_dim, bias=True),
             nn.LeakyReLU(),
         )
         # TODO: make a for with encoder.append or encoder.add_module
         self.decoder = nn.Sequential(
-            nn.BatchNorm1d(embedding_dim),
-            nn.Linear(in_features=embedding_dim, out_features=neurons_num[2], bias=True),
+            nn.BatchNorm1d(self.embedding_dim),
+            nn.Linear(in_features=self.embedding_dim, out_features=neurons_num[2], bias=True),
             nn.LeakyReLU(),
             nn.BatchNorm1d(neurons_num[2]), 
             nn.Linear(in_features=neurons_num[2], out_features=neurons_num[1], bias=True),
@@ -63,7 +63,7 @@ class IMEO(nn.Module):
         
         print("input size: ", inputSize, 
               "embedding_percentage: ",embedding_percentage,
-              "embedding_dim: ", embedding_dim, 
+              "embedding_dim: ", self.embedding_dim, 
               "neurons_num: ", neurons_num)
     
     def saveModel(self, path):

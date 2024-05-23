@@ -21,14 +21,14 @@ CL_num_epochs = 20
 CL_patience = 10
 
 # ENCODER PARAMETERS
-EN_binary_loss_weight = 0.6
+EN_binary_loss_weight = 0.6 # not used
 EN_batch_size = 200
 EN_learning_rate = 0.0015
 EN_plot = False
-EN_embedding_dim_list = [10, 20, 30]
+EN_embedding_perc_list = [0.1, 0.5, 1]
 EN_weight_decay = 0.05e-5
-EN_num_epochs = 20
-EN_masked_percentage_list = [0.1, 0.2, 0.3]
+EN_num_epochs = 200
+EN_masked_percentage_list = [0, 0.25, 0.5]
 EN_patience = 20
 
 device = torch.device(  "cuda" if torch.cuda.is_available() 
@@ -52,33 +52,31 @@ binary_clumns = dict['bin_col']
 
 results = []
     
-for embedding_dim, masked_percentage in product(EN_embedding_dim_list, EN_masked_percentage_list):
-    print(f'\n\nEmbedding dim: {embedding_dim}, Masked percentage: {masked_percentage}\n')
+for embedding_perc, masked_percentage in product(EN_embedding_perc_list, EN_masked_percentage_list):
+    print(f'\n\nEmbedding perc: {embedding_perc}, Masked percentage: {masked_percentage}\n')
     # create encoder
     encoder = IMEO(
         inputSize=tr_data.shape[1], 
         total_binary_columns=binary_clumns, 
-        embedding_dim=embedding_dim,
-        neurons_num=[100, 80, 40]
+        embedding_percentage=embedding_perc
         )
     # fit encoder
     encoder.fit(
         tr_data, 
         val_data,
         optimizer = torch.optim.Adam(encoder.parameters(), weight_decay=EN_weight_decay, lr=EN_learning_rate),
-        device = device,
-        binary_loss_weight = EN_binary_loss_weight, 
+        device = device, 
         batch_size = EN_batch_size,
         plot = EN_plot,
         num_epochs = EN_num_epochs, 
         masked_percentage = masked_percentage,
         early_stopping=EN_patience
     )
-    encoder.saveModel(f'./Encoder_classifier/Models/encoder_{embedding_dim}_{masked_percentage}.pth')
+    encoder.saveModel(f'./Encoder_classifier/Models/encoder_{embedding_perc}_{masked_percentage}.pth')
     # we freeze the encoder
     encoder.freeze()
     # create classifier
-    classifier = ClassifierBinary(inputSize=embedding_dim)
+    classifier = ClassifierBinary(inputSize=encoder.embedding_dim)
     # fit classifier
     trLoss, vlLoss, trAcc, vlAcc = classifier.fit(
         tr_data, 
@@ -95,11 +93,22 @@ for embedding_dim, masked_percentage in product(EN_embedding_dim_list, EN_masked
         plot=CL_plot
     )
     
-    classifier.saveModel(f'./Encoder_classifier/Models/classifier_{embedding_dim}_{masked_percentage}.pth')
+    classifier.saveModel(f'./Encoder_classifier/Models/classifier_{embedding_perc}_{masked_percentage}.pth')
     
-    results.append((embedding_dim, masked_percentage, trAcc, vlAcc, trLoss, vlLoss))
+    dict_params = {
+        'embedding_dim': encoder.embedding_dim,
+        'embedding_perc': embedding_perc,
+        'masked_percentage': masked_percentage,
+        'trAcc': trAcc,
+        'vlAcc': vlAcc,
+        'trLoss': trLoss,
+        'vlLoss': vlLoss
+    }
+    
+    results.append(dict_params)
+    
+    with open('./Encoder_classifier/Models/results.json', 'w') as f:
+        json.dump(results, f, indent=4)
 
 print(results)
 
-with open('./Encoder_classifier/Models/results.json', 'w') as f:
-    json.dump(results, f)
