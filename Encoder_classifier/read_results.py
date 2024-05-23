@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
 from scipy.interpolate import griddata
+from numpy import unique
 
 
 
@@ -10,17 +11,14 @@ from scipy.interpolate import griddata
 with open('Encoder_classifier/Models/results.json', 'r') as file:
     results = json.load(file)
 
-ax = plt.figure().add_subplot(projection='3d')
-X_list = [t[0] for t in results]
-Y_list = [t[1] for t in results]
-Z_list = [t[3] for t in results] 
+X_list = [model['embedding_perc'] for model in results]
+Y_list = [model['masked_percentage'] for model in results]
+Z_list = [model['report']['macro avg']['f1-score'] for model in results]
 
-X, Y = np.meshgrid(X_list, Y_list)
+X, Y = np.meshgrid(unique(sorted(X_list)), unique(sorted(Y_list)))
 
 # Interpola i valori Z per la griglia
 Z = griddata((X_list, Y_list), Z_list, (X, Y), method='nearest') # TODO: Controllare se funzioni
-
-
 
 #X, Y, Z = axes3d.get_test_data(0.05)
 
@@ -28,19 +26,18 @@ print(X)
 print(Y)
 print(Z)
 
+ax = plt.figure().add_subplot(projection='3d')
 
 # Plot the 3D surface
-ax.plot_surface(X, Y, Z, edgecolor='royalblue', lw=0.5, rstride=8, cstride=8,
-                alpha=0.3)
+ax.plot_surface(X, Y, Z, edgecolor='royalblue', lw=0.5, rstride=8, cstride=8, alpha=0.3)
 
 # Plot projections of the contours for each dimension.  By choosing offsets
 # that match the appropriate axes limits, the projected contours will sit on
 # the 'walls' of the graph
-ax.contourf(X, Y, Z, zdir='z', offset=-100, cmap='coolwarm')
-ax.contourf(X, Y, Z, zdir='x', offset=-40, cmap='coolwarm')
-ax.contourf(X, Y, Z, zdir='y', offset=40, cmap='coolwarm')
+ax.contourf(X, Y, Z, zdir='z', offset=-0.2, cmap='coolwarm')
+ax.contourf(X, Y, Z, zdir='x', offset=-0.2, cmap='coolwarm')
+ax.contourf(X, Y, Z, zdir='y', offset=-0.2, cmap='coolwarm')
 
-ax.set(xlim=(-40, 40), ylim=(-40, 40), zlim=(-100, 100),
-       xlabel='X', ylabel='Y', zlabel='Z')
+ax.set(xlim=(-0.2, 1.2), ylim=(-0.2, 1.2), zlim=(-0.2, 1.2), xlabel='Embedding percentage', ylabel='Masked percentage', zlabel='Macro avg F1-score')
 
 plt.show()
