@@ -29,7 +29,7 @@ print(Z)
 ax = plt.figure().add_subplot(projection='3d')
 
 # Plot the 3D surface
-ax.plot_surface(X, Y, Z, edgecolor='royalblue', lw=0.5, rstride=8, cstride=8, alpha=0.3)
+ax.plot_surface(X, Y, Z, edgecolor='royalblue', alpha=0.3)
 
 # Plot projections of the contours for each dimension.  By choosing offsets
 # that match the appropriate axes limits, the projected contours will sit on
@@ -40,4 +40,5 @@ ax.contourf(X, Y, Z, zdir='y', offset=-0.2, cmap='coolwarm')
 
 ax.set(xlim=(-0.2, 1.2), ylim=(-0.2, 1.2), zlim=(-0.2, 1.2), xlabel='Embedding percentage', ylabel='Masked percentage', zlabel='Macro avg F1-score')
 
+plt.savefig('Encoder_classifier/Models/3dPlot.png')
 plt.show()
