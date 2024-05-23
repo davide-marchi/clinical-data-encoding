@@ -47,7 +47,7 @@ def normalize_data(tr: pd.DataFrame, val:pd.DataFrame, test:pd.DataFrame , tr_ma
         test[col_value] = (test[col_value] - min) / (max - min)
     return tr, val, test, binaryColums
 
-def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_state:int) -> dict:
+def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_state:int, oversampling:bool = False) -> dict:
     mask = data.copy()
     mask = mask.iloc[:, :-1]
     mask = mask.isnull().astype(int)
