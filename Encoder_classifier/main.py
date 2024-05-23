@@ -8,6 +8,7 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilsData import dataset_loader, load_data
 import json
+from sklearn.metrics import classification_report
 
 # TODO: for plotting the 3D plot !!!!!see the link below!!!!subscribe to the channel
 # https://matplotlib.org/stable/gallery/mplot3d/contourf3d_2.html#sphx-glr-gallery-mplot3d-contourf3d-2-py
@@ -94,6 +95,10 @@ for embedding_perc, masked_percentage in product(EN_embedding_perc_list, EN_mask
     )
     
     classifier.saveModel(f'./Encoder_classifier/Models/classifier_{embedding_perc}_{masked_percentage}.pth')
+
+    y_pred = torch.round(classifier.forward(encoder.encode(val_data))).detach().numpy()
+
+    report = classification_report(val_out, y_pred, output_dict=True)
     
     dict_params = {
         'embedding_dim': encoder.embedding_dim,
@@ -102,7 +107,8 @@ for embedding_perc, masked_percentage in product(EN_embedding_perc_list, EN_mask
         'trAcc': trAcc,
         'vlAcc': vlAcc,
         'trLoss': trLoss,
-        'vlLoss': vlLoss
+        'vlLoss': vlLoss,
+        'report': report
     }
     
     results.append(dict_params)
