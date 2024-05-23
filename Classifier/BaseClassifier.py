@@ -59,7 +59,7 @@ class BaseClassifier(nn.Module):
         """
         return self.network(x)
     
-    def binary_loss(self, output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    def binary_loss(self, output: torch.Tensor, target: torch.Tensor, weight_1:float = 0.3, weight_2:float = 0.75) -> torch.Tensor:
         """
         Compute the binary cross-entropy loss.
 
@@ -73,13 +73,17 @@ class BaseClassifier(nn.Module):
         # Squeeze the output and target tensors to remove any unnecessary dimensions
         output = output.squeeze()
         target = target.squeeze()
-
+        
+        class_weights = target.clone()
+        class_weights=(class_weights-1)*weight_1
+        class_weights = target*weight_2 - class_weights
+        
         # Compute the binary cross-entropy loss
-        loss = nn.functional.binary_cross_entropy(output, target)
+        loss = nn.functional.binary_cross_entropy(output, target, weight=class_weights)
 
         return loss
 
-    def fit_model(self, train_loader, val_loader, optimizer, scheduler, device, num_epochs):
+    def fit_model(self, train_loader, val_loader, optimizer, device, num_epochs, scheduler):
         """
         Train the model using the provided data and validate it.
 
