@@ -25,11 +25,14 @@ def plot_c_matrix(test_label, test_pred, classifier_name):
     
     disp.plot()
     plt.title('Confusion matrix of ' + classifier_name)
+    
+    plt.savefig("Confusion_Matrix.png")
+    
     # Display the plot
     plt.show()
 
 
-def report_scores(test_label, test_pred, labels=None):
+def report_scores(test_label, test_pred, labels=None, dict_metric=False):
     """
     Prints the classification report for the given test labels and predictions.
     
@@ -41,7 +44,11 @@ def report_scores(test_label, test_pred, labels=None):
     Returns:
         None
     """
+    if dict_metric:
     # Print the classification report using sklearn's classification_report function
+        dict_metric = classification_report(test_label, test_pred, labels=labels, output_dict=True)
+        return dict_metric
+    
     print(classification_report(test_label, test_pred, labels=labels))
     
 def plot_loss(train_losses, val_losses=None, figsize=(8,6), print_every=1):
@@ -64,6 +71,7 @@ def plot_loss(train_losses, val_losses=None, figsize=(8,6), print_every=1):
     plt.title('Training and Validation Losses')
     plt.legend()
     plt.xticks(epochs[::print_every])
+    plt.savefig("Loss.png")
     plt.show()
     
 def plot_accuracy(train_accuracies, val_accuracies=None, figsize=(8,6), print_every=1):
@@ -86,4 +94,5 @@ def plot_accuracy(train_accuracies, val_accuracies=None, figsize=(8,6), print_ev
     plt.title('Training and Validation Accuracies')
     plt.legend()
     plt.xticks(epochs[::print_every])
+    plt.savefig("Accuracy.png")
     plt.show()

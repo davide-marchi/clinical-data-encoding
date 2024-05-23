@@ -12,14 +12,16 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 from utilsData import dataset_loader
 from BaseClassifier import BaseClassifier
+from Evaluation_Metrics import report_scores
 
 # Definisci gli iperparametri da testare
-LEARNING_RATES = [1e-04, 1e-05]
-EPOCHS = [200, 250]
-TRAIN_BATCH_SIZES = [50]
+LEARNING_RATES = [0.00005]
+EPOCHS = [150]
+TRAIN_BATCH_SIZES = [75]
 VALID_BATCH_SIZES = [25]
-WEIGHT_DECAYS = [1e-6, 1e-5]
-GAMMA = [0, 0.1]
+WEIGHT_DECAYS = [0.03, 0.05, 0.06]
+GAMMA = [0, 0.0001]
+STEP_SIZE=[75, 85, 100]
 
 # Define device (use "cpu" since the dataset is small)
 device = torch.device("cpu")
@@ -57,7 +59,7 @@ torch.manual_seed(42)
 results = []
 
 # Itera su tutte le combinazioni di iperparametri
-for lr, epochs, train_batch_size, valid_batch_size, weight_decay, gamma in itertools.product(LEARNING_RATES, EPOCHS, TRAIN_BATCH_SIZES, VALID_BATCH_SIZES, WEIGHT_DECAYS, GAMMA):
+for lr, epochs, train_batch_size, valid_batch_size, weight_decay, gamma, step_size in itertools.product(LEARNING_RATES, EPOCHS, TRAIN_BATCH_SIZES, VALID_BATCH_SIZES, WEIGHT_DECAYS, GAMMA, STEP_SIZE):
     
     # Definisci il DataLoader per il training set
     train_dataset = TensorDataset(tr_data, tr_out)
@@ -72,10 +74,17 @@ for lr, epochs, train_batch_size, valid_batch_size, weight_decay, gamma in itert
     
     # Definisci ottimizzatore e scheduler
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=gamma)  # Esempio di scheduler
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)  # Esempio di scheduler
     
     # Addestra il modello
-    train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, scheduler, device, epochs)
+    train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, device, epochs, scheduler)
+    val_prediction, val_target = model.test_model(val_loader, device)
+    
+    val_dict=report_scores(val_target, val_prediction, labels=[0, 1], dict_metric=True)
+    print(val_dict)
+    
+    macro=val_dict["macro avg"]
+    macro_f1=macro["f1-score"]
     
     # Calcola la media della val_loss finale
     final_val_loss = val_loss[-1]
@@ -89,12 +98,14 @@ for lr, epochs, train_batch_size, valid_batch_size, weight_decay, gamma in itert
         'valid_batch_size': valid_batch_size,
         'weight_decay': weight_decay,
         'gamma': gamma,
+        "step_size": step_size,
         'final_val_loss': final_val_loss,
-        'final_val_accuracy': final_val_accuracy
+        'final_val_accuracy': final_val_accuracy,
+        'f1_score': macro_f1
     })
 
 # Trova la configurazione migliore
-best_config = max(results, key=lambda x: x['final_val_accuracy'])
+best_config = max(results, key=lambda x: x['f1_score'])
 
 # Stampare la configurazione migliore
 print("Best Configuration:")

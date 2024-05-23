@@ -16,11 +16,11 @@ from Evaluation_Metrics import plot_accuracy, plot_loss, plot_c_matrix, report_s
 
 # Define hyperparameters
 LEARNING_RATE = 0.00005
-EPOCHS = 300
+EPOCHS = 200
 TRAIN_BATCH_SIZE = 75
 VALID_BATCH_SIZE = 35
-WEIGHT_DECAY=0
-GAMMA=0
+WEIGHT_DECAY=0.05
+GAMMA=0.0001
 
 # Define device (use "cpu" since the dataset is small)
 device = torch.device("cpu")
@@ -80,10 +80,10 @@ model.to(device)
 
 # Define optimizer
 optimizer = torch.optim.Adam(params=model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=GAMMA)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=85, gamma=GAMMA)
 
 # Train the model
-train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, scheduler, device, EPOCHS)
+train_loss, val_loss, train_accuracy, val_accuracy = model.fit_model(train_loader, val_loader, optimizer, device, EPOCHS, scheduler)
 
 # Plot training loss and accuracy
 plot_loss(train_losses=train_loss, val_losses=val_loss)
