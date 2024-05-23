@@ -69,6 +69,7 @@ train_data = tr_data.to(device)
 val_data = val_data.to(device)
 data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
+exit()
 patience = 10
 
 history = encoder_decoder.fit(train_data,
