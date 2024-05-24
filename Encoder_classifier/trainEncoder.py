@@ -10,7 +10,7 @@ device = torch.device(  "cuda" if torch.cuda.is_available()
                         else "cpu"
                     )
 #we have small amount of data, so we will use cpu (looks faster)
-device = torch.device("cuda")
+device = torch.device("cpu")
 print("Device: ", device)
 
 folderName = './Datasets/Cleaned_Dataset/'
@@ -29,10 +29,10 @@ binary_loss_weight = binary_clumns/(tr_data.shape[1]//2)
 batch_size = 300
 learning_rate = 0.002
 plot = True
-embedding_dim = 17
+embedding_dim = 0.9
 weight_decay = 0.2e-5
 num_epochs = 300
-masked_percentage = 0.25
+masked_percentage = 0.2
 
 print(f'Number of binary columns: {binary_clumns}')
 print(f'Total number of columns: {tr_data.shape[1]/2}')
@@ -46,7 +46,7 @@ print(f'Number of epochs: {num_epochs}')
 encoder_decoder = IMEO(
     inputSize=tr_data.shape[1], 
     total_binary_columns=binary_clumns, 
-    embedding_percentage=0.25
+    embedding_percentage=embedding_dim
     )
 
 

@@ -34,10 +34,19 @@ class ClassifierBinary(nn.Module):
     def forward(self, x):
         return self.network(x)
     
-    def binary_loss(self, output:torch.Tensor, target:torch.Tensor) -> torch.Tensor:
+    def binary_loss(self, output:torch.Tensor, target:torch.Tensor, weight=(1.0, 1.0)) -> torch.Tensor:
+        '''
+        Compute the binary cross entropy loss between the output and target tensors.
+        weight_1: weight for the negative class (alive)
+        weight_2: weight for the positive class (dead)
+        '''
+        weight_1, weight_2 = weight
         output = output.squeeze()
         target = target.squeeze()
-        return nn.functional.binary_cross_entropy(output, target)
+        class_weights = target.clone()
+        class_weights=(class_weights-1)*weight_1
+        class_weights = target*weight_2 - class_weights
+        return nn.functional.binary_cross_entropy(output, target, weight=class_weights)
     
     def compute_accuracy(self, input:torch.Tensor, target:torch.Tensor) -> float:
         input = input.squeeze()
@@ -50,7 +59,10 @@ class ClassifierBinary(nn.Module):
                 nn.init.kaiming_uniform_(m.weight)
                 nn.init.uniform_(m.bias, -0.5, 0.5)
 
-    def fit(self, train_data, tr_out, val_data, val_out, optimizer, device, num_epochs, batch_size, print_every=10, plot=True, preprocess= lambda x:x, early_stopping=0)->tuple:
+    def fit(self, train_data, tr_out, val_data, val_out, 
+            optimizer, device, num_epochs, batch_size, 
+            print_every=10, plot=True, preprocess= lambda x:x, 
+            early_stopping=0, loss_weight=(1.0, 1.0))->tuple:
 
         train_losses = []
         val_losses = []
@@ -85,7 +97,7 @@ class ClassifierBinary(nn.Module):
                 y = y.to(device)
 
                 y_hat = self(x)
-                loss = self.binary_loss(y_hat, y)
+                loss = self.binary_loss(y_hat, y, weight=loss_weight)
                 loss.backward()
                 optimizer.step()
 
@@ -100,7 +112,7 @@ class ClassifierBinary(nn.Module):
                     y = y.to(device)
 
                     y_hat = self(x)
-                    loss = self.binary_loss(y_hat, y)
+                    loss = self.binary_loss(y_hat, y, weight=loss_weight)
 
                     epoch_val_loss += loss.item()
                     epoch_val_accuracy += self.compute_accuracy(y_hat, y)

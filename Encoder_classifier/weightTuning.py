@@ -6,12 +6,26 @@ from torcheval.metrics.functional import binary_accuracy
 from torch.utils.data import DataLoader, TensorDataset
 import torch
 
+def binary_loss(output:torch.Tensor, target:torch.Tensor, weight=(1.0, 1.0)) -> torch.Tensor:
+        '''
+        Compute the binary cross entropy loss between the output and target tensors.
+        weight_1: weight for the negative class (alive)
+        weight_2: weight for the positive class (dead)
+        '''
+        weight_1, weight_2 = weight
+        output = output.squeeze()
+        target = target.squeeze()
+        class_weights = target.clone()
+        class_weights=(class_weights-1)*weight_1
+        class_weights = target*weight_2 - class_weights
+        return binary_cross_entropy(output, target, weight=class_weights)
 
 def tune_jointly(imeo:IMEO, classifier:ClassifierBinary, 
          tr, tr_o, vl, vl_o, 
          lr:float, ep:int, wd:float,
          batch_size:int, patience:int, 
-         print_time:int, device)->"dict[str:'list[float]']":
+         print_time:int, device,
+         classifier_loss_weight=(0.3, 0.7))->"dict[str:'list[float]']":
     '''
     imeo: an IMEO model already trained,
     classfier: a classifier, already created to train,
@@ -48,10 +62,10 @@ def tune_jointly(imeo:IMEO, classifier:ClassifierBinary,
             optimizer.zero_grad()
             x, y = batch
             x, y = x.to(device), y.to(device)
-            x = imeo.set_mask_for_imputation(x)
+            #x = imeo.set_mask_for_imputation(x)
 
             y_hat:torch.Tensor = fullModel(x).squeeze()
-            loss = binary_cross_entropy(y_hat, y)
+            loss = binary_loss(y_hat, y, classifier_loss_weight)
             epoch_train_accuracy += binary_accuracy(y_hat, y)
             epoch_train_loss += loss.item()
             loss.backward()
@@ -62,10 +76,10 @@ def tune_jointly(imeo:IMEO, classifier:ClassifierBinary,
             for batch in val_loader:
                 x, y = batch
                 x, y = x.to(device), y.to(device)
-                x = imeo.set_mask_for_imputation(x)
+                #x = imeo.set_mask_for_imputation(x)
 
                 y_hat = fullModel(x).squeeze()
-                loss = binary_cross_entropy(y_hat, y)
+                loss = binary_loss(y_hat, y, weight=classifier_loss_weight)
                 epoch_val_accuracy += binary_accuracy(y_hat, y)
                 epoch_val_loss += loss.item()
 

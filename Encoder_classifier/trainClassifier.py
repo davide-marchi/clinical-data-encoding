@@ -5,6 +5,7 @@ import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilsData import dataset_loader, load_data
+from sklearn.metrics import classification_report
 
 
 device = torch.device(  "cuda" if torch.cuda.is_available() 
@@ -27,10 +28,10 @@ val_out = dict['val_out']
 binary_clumns = dict['bin_col']
 
 batch_size = 100
-learning_rate = 0.002
-plot = False
-weight_decay = 0.8e-5
-num_epochs = 20
+learning_rate = 0.0002
+plot = True
+weight_decay = 2.0e-5
+num_epochs = 50
 
 print(f'Number of binary columns: {binary_clumns}')
 print(f'Total number of columns: {tr_data.shape[1]/2}')
@@ -64,9 +65,22 @@ history = classifier.fit(train_data,
                          batch_size=batch_size, 
                          preprocess=encoder_decoder.encode,
                          print_every=num_epochs//10,
-                         early_stopping=patience
+                         early_stopping=patience,
+                         loss_weight=(0.3, 0.7)
                          )
 
+from weightTuning import tune_jointly
+
+tune_jointly(encoder_decoder, classifier, 
+             tr_data, tr_out, val_data, val_out, 
+             lr=0.0002, ep=20, batch_size=100, patience=50, wd=0.0001,
+             classifier_loss_weight=(0.3, 0.7),
+             print_time=3, device=device)
+
+y_pred = torch.round(classifier(encoder_decoder.encode(val_data))).detach().numpy()
+
+report = classification_report(val_out, y_pred, output_dict=True)
+print(report['macro avg']['f1-score'])
 print('\n\nModel Trained\n\n')
 print('Saving model...')
 #encoder_decoder.saveModel('./Classifier/classifier.pth')

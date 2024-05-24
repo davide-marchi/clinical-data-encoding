@@ -192,10 +192,11 @@ class IMEO(nn.Module):
             param.requires_grad = True
               
     # sets imputation values to 0
-    def mask_imputation_step(self, batch:torch.Tensor, masked_percentage:float = 0.5):
+    def mask_imputation_step(self, batch:torch.Tensor, masked_percentage:float = 0.5, device:torch.device = torch.device('cpu')):
         batch = batch.clone()
         val, mask = torch.chunk(batch, 2, dim=1)
-        imputation_mask = torch.where((torch.rand_like(mask) < masked_percentage) & (mask == 1.0), torch.tensor(0.0), mask) 
+        rand_mask = torch.rand_like(mask)
+        imputation_mask = torch.where((rand_mask < masked_percentage) & (mask == 1.0), torch.tensor(0.0, device=device), mask) 
         # important set to 0 imputation elements in the val part too
         val = torch.mul(val, imputation_mask)
         return torch.cat((val, imputation_mask), dim=1)
@@ -222,9 +223,9 @@ class IMEO(nn.Module):
         for i in range(num_epochs):
             for batch in data_loader:
                 # fancy imputation stuff
-                imputation_batch = self.mask_imputation_step(batch, masked_percentage)
-                optimizer.zero_grad()
                 batch = batch.to(device)
+                imputation_batch = self.mask_imputation_step(batch, masked_percentage, device)
+                optimizer.zero_grad()
                 imputation_batch = imputation_batch.to(device)
                 loss = self.training_step(batch, imputation_batch, binaryLossWeight=binary_loss_weight)
                 loss.backward()
