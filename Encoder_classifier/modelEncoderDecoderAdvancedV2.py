@@ -216,7 +216,9 @@ class IMEO(nn.Module):
             early_stopping:int = 0
         ) -> dict:
         
-        
+        self.to(device)
+        train_data = train_data.to(device)
+        val_data = val_data.to(device)
         binary_loss_weight = self.total_binary_columns / (self.inputSize // 2) if binary_loss_weight is None else binary_loss_weight
         data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
         metrics_hystory = {metric:[] for metric in metrics}

@@ -68,12 +68,12 @@ class ClassifierBinary(nn.Module):
         val_losses = []
         train_accuracies = []
         val_accuracies = []
-        print(f'output: {tr_out.shape}')
-        print(f'input: {train_data.shape}')
+        #print(f'output: {tr_out.shape}')
+        #print(f'input: {train_data.shape}')
         if train_data.shape[0] != tr_out.shape[0]:
             print("Error: The number of samples in the input and output tensors must match")
-        print(f"Input: {val_data.shape}")
-        print(f"Output: {val_out.shape}")
+        #print(f"Input: {val_data.shape}")
+        #print(f"Output: {val_out.shape}")
         if val_data.shape[0] != val_out.shape[0]:
             print("Error: The number of samples in the input and output tensors must match")
         train_loader = DataLoader(TensorDataset(train_data, tr_out), batch_size=batch_size, shuffle=True)
@@ -92,9 +92,8 @@ class ClassifierBinary(nn.Module):
                 optimizer.zero_grad()
 
                 x, y = batch
+                x, y = x.to(device), y.to(device)
                 x = preprocess(x)
-                x = x.to(device)
-                y = y.to(device)
 
                 y_hat = self(x)
                 loss = self.binary_loss(y_hat, y, weight=loss_weight)
@@ -107,9 +106,8 @@ class ClassifierBinary(nn.Module):
             with torch.no_grad():
                 for batch in val_loader:
                     x, y = batch
+                    x, y = x.to(device), y.to(device)
                     x = preprocess(x)
-                    x = x.to(device)
-                    y = y.to(device)
 
                     y_hat = self(x)
                     loss = self.binary_loss(y_hat, y, weight=loss_weight)
