@@ -255,8 +255,10 @@ class IMEO(nn.Module):
             if print_every != 0 and i % print_every == 0:
                 print('')
                 
+            # there is a minimum for early stopping defined as 150 epochs
+            # it is needed for the model to stabilize
             if early_stopping > 0:
-                if i > early_stopping:
+                if i > early_stopping and i > 150:
                     if metrics_hystory['val_loss'][-early_stopping] < metrics_hystory['val_loss'][-1]*0.999:
                         print(f"\nEarly stopping at epoch {i+1}")
                         break
