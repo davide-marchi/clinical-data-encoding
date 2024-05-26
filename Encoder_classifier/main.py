@@ -63,7 +63,7 @@ device = torch.device(  "cuda" if torch.cuda.is_available()
                         else "cpu"
                     )
 #we have small amount of data, so we will use cpu (looks faster)
-device = torch.device("cpu")
+#device = torch.device("cpu")
 print("Device: ", device)
 
 folderName = './Datasets/Cleaned_Dataset/'
