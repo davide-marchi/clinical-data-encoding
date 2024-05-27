@@ -27,10 +27,10 @@ EN_binary_loss_weight = [None]
 EN_batch_size = [200]
 EN_learning_rate = [0.0015, 0.002]
 EN_plot = False
-EN_embedding_perc_list = [0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1]
+EN_embedding_perc_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
 EN_weight_decay = [0.05e-5, 0.2e-5]
 EN_num_epochs = [250]
-EN_masked_percentage_list = [0, 0.1, 0.2, 0.3, 0.5, 0.7, 0.9]
+EN_masked_percentage_list = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 EN_patience = [10]
 
 tot_models = len(CL_learning_rate) * len(CL_weight_decay) * len(CL_loss_weight) * len(EN_learning_rate) * len(EN_weight_decay) * len(EN_embedding_perc_list) * len(EN_masked_percentage_list)

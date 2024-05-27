@@ -11,9 +11,17 @@ from numpy import unique
 with open('Encoder_classifier/Models/results.json', 'r') as file:
     results = json.load(file)
 
-X_list = [model['embedding_perc'] for model in results]
-Y_list = [model['masked_percentage'] for model in results]
-Z_list = [model['report']['macro avg']['f1-score'] for model in results]
+X_list = unique(sorted([model['embedding_perc'] for model in results]))
+Y_list = unique(sorted([model['masked_percentage'] for model in results]))
+
+Z_list = []
+for embedding_perc, masked_percentage in zip(X_list, Y_list):
+    # check if this is working correctly
+    max_f1_score = max([model['report']['macro avg']['f1-score'] for model in results if model['embedding_perc'] == embedding_perc and model['masked_percentage'] == masked_percentage])
+    Z_list.append(max_f1_score)
+    
+
+#Z_list = [model['report']['macro avg']['f1-score'] for model in results]
 
 X, Y = np.meshgrid(unique(sorted(X_list)), unique(sorted(Y_list)))
 
