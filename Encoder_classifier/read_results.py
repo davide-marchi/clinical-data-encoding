@@ -1,32 +1,41 @@
 import json
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import axes3d
 from scipy.interpolate import griddata
 from numpy import unique
 from itertools import product
-
-
+# from mpl_toolkits.mplot3d import axes3d
 
 # Read JSON file
 with open('Encoder_classifier/Models/results.json', 'r') as file:
     results = json.load(file)
 
+# Select the unique values of the embedding_perc and masked_percentage
 X_unique = unique(sorted([model['embedding_perc'] for model in results]))
 Y_unique = unique(sorted([model['masked_percentage'] for model in results]))
 
+# Initialize empty lists (embedding_perc, masked_percentage, macro avg f1_score)
 X_list = []
 Y_list = []
 Z_list = []
 
+# Cycle for every possible permutation of embedding_perc and masked_percentage
 for embedding_perc, masked_percentage in product(X_unique, Y_unique):
-    # check if this is working correctly
+
+    """
+    # To test
+    model_list = [model for model in results if model['embedding_perc'] == embedding_perc and model['masked_percentage'] == masked_percentage]
+    print(len(model_list))
+    model_list_json = json.dumps(model_list, indent=4)
+    with open('Encoder_classifier/Models/temp_list.json', 'w') as file:
+        file.write(model_list_json)
+    """
+
+    # TODO: Check this
     max_f1_score = max([model['report']['macro avg']['f1-score'] for model in results if model['embedding_perc'] == embedding_perc and model['masked_percentage'] == masked_percentage])
     Z_list.append(max_f1_score)
     X_list.append(embedding_perc)
     Y_list.append(masked_percentage)
-    
-#Z_list = [model['report']['macro avg']['f1-score'] for model in results]
 
 X, Y = np.meshgrid(X_unique, Y_unique)
 
