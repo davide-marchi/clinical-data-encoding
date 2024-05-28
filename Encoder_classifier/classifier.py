@@ -11,13 +11,13 @@ class ClassifierBinary(nn.Module):
     def __init__(self, inputSize:int) -> None:
         super().__init__()
         self.network = nn.Sequential(
-            nn.Linear(in_features=inputSize, out_features=40, bias=True),
+            nn.Linear(in_features=inputSize, out_features=80, bias=True),
             nn.LeakyReLU(),
-            nn.BatchNorm1d(40),
-            nn.Linear(in_features=40, out_features=40, bias=True),
+            nn.BatchNorm1d(80),
+            nn.Linear(in_features=80, out_features=50, bias=True),
             nn.LeakyReLU(),
-            nn.BatchNorm1d(40),
-            nn.Linear(in_features=40, out_features=30, bias=True),
+            nn.BatchNorm1d(50),
+            nn.Linear(in_features=50, out_features=30, bias=True),
             nn.LeakyReLU(),
             nn.BatchNorm1d(30),
             nn.Linear(in_features=30, out_features=1, bias=True),
@@ -100,9 +100,6 @@ class ClassifierBinary(nn.Module):
                 loss.backward()
                 optimizer.step()
 
-                epoch_train_loss += loss.item()
-                epoch_train_accuracy += self.compute_accuracy(y_hat, y)
-
             with torch.no_grad():
                 for batch in val_loader:
                     x, y = batch
@@ -114,6 +111,16 @@ class ClassifierBinary(nn.Module):
 
                     epoch_val_loss += loss.item()
                     epoch_val_accuracy += self.compute_accuracy(y_hat, y)
+                for batch in train_loader:
+                    x, y = batch
+                    x, y = x.to(device), y.to(device)
+                    x = preprocess(x)
+
+                    y_hat = self(x)
+                    loss = self.binary_loss(y_hat, y, weight=loss_weight)
+
+                    epoch_train_loss += loss.item()
+                    epoch_train_accuracy += self.compute_accuracy(y_hat, y)
 
             epoch_train_loss /= len(train_loader)
             epoch_val_loss /= len(val_loader)
