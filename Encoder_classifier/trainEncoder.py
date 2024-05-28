@@ -25,7 +25,7 @@ val_out = dict['val_out']
 binary_clumns = dict['bin_col']
 
 
-binary_loss_weight = binary_clumns/(tr_data.shape[1]//2)
+binary_loss_weight = 0.4
 batch_size = 300
 learning_rate = 0.002
 plot = True
