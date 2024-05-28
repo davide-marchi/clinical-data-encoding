@@ -29,7 +29,7 @@ binary_loss_weight = 0.4
 batch_size = 300
 learning_rate = 0.002
 plot = True
-embedding_dim = 0.9
+embedding_dim = 1.9
 weight_decay = 0.2e-5
 num_epochs = 300
 masked_percentage = 0.2
@@ -49,8 +49,10 @@ encoder_decoder = IMEO(
     embedding_percentage=embedding_dim
     )
 
+print('Model created')
+print(encoder_decoder)
 
-#print(encoder_decoder)
+
 
 encoder_decoder.to(device)
 
