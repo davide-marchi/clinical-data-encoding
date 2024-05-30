@@ -33,7 +33,8 @@ EN_num_epochs = [250]
 EN_masked_percentage_list = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
 EN_patience = [10]
 
-tot_models = len(CL_learning_rate) * len(CL_weight_decay) * len(CL_loss_weight) * len(EN_learning_rate) * len(EN_weight_decay) * len(EN_embedding_perc_list) * len(EN_masked_percentage_list)
+tot_models = len(CL_batch_size)*len(CL_learning_rate)*len(CL_weight_decay)*len(CL_num_epochs)*len(CL_patience)*len(CL_loss_weight)*\
+    len(EN_binary_loss_weight)*len(EN_batch_size)*len(EN_learning_rate)*len(EN_embedding_perc_list)*len(EN_weight_decay)*len(EN_num_epochs)*len(EN_masked_percentage_list)*len(EN_patience)
 print(f'Total number of models: {tot_models}')
 tot_min = (5/9)*tot_models
 print(f'Expected time: {tot_min//60}h {tot_min%60}m')

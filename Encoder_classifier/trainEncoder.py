@@ -19,18 +19,19 @@ dataset = load_data(folderName + fileName)
 
 dict = dataset_loader(dataset, 0.1, 0.2, 42)
 tr_data = dict['tr_data']
+tr_data = tr_data[0:4000]
 tr_out = dict['tr_out']
 val_data = dict['val_data']
 val_out = dict['val_out']
 binary_clumns = dict['bin_col']
 
 
-binary_loss_weight = 0.4
+binary_loss_weight = 0.5
 batch_size = 300
 learning_rate = 0.002
 plot = True
-embedding_dim = 0.3
-weight_decay = 0.2e-5
+embedding_dim = 0.5
+weight_decay = 0.25e-5
 num_epochs = 300
 masked_percentage = 0.2
 

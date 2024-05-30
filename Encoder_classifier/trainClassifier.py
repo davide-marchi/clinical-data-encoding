@@ -22,16 +22,18 @@ dataset = load_data(folderName + fileName)
 
 dict = dataset_loader(dataset, 0.1, 0.2, 42)
 tr_data = dict['tr_data']
+tr_data = tr_data[4000:-1]
 tr_out = dict['tr_out']
+tr_out = tr_out[4000:-1]
 val_data = dict['val_data']
 val_out = dict['val_out']
 binary_clumns = dict['bin_col']
 
 batch_size = 200
-learning_rate = 0.00008
+learning_rate = 0.00001
 plot = True
-weight_decay = 2.5e-5
-num_epochs = 50
+weight_decay = 0.5e-5
+num_epochs = 100
 
 print(f'Number of binary columns: {binary_clumns}')
 print(f'Total number of columns: {tr_data.shape[1]/2}')
@@ -73,7 +75,7 @@ from weightTuning import tune_jointly
 
 tune_jointly(encoder_decoder, classifier, 
              tr_data, tr_out, val_data, val_out, 
-             lr=0.0001, ep=10, batch_size=100, patience=50, wd=0.0001,
+             lr=0.0001, ep=20, batch_size=100, patience=50, wd=0.0001,
              classifier_loss_weight=(0.3, 0.7),
              print_time=3, device=device)
 
