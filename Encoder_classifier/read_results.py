@@ -44,9 +44,19 @@ Z = griddata((X_list, Y_list), Z_list, (X, Y), method='nearest') # TODO: Control
 
 #X, Y, Z = axes3d.get_test_data(0.05)
 
-print(X)
-print(Y)
-print(Z)
+#print(X)
+#print(Y)
+#print(Z)
+
+X_min = np.min(X)
+X_max = np.max(X)
+Y_min = np.min(Y)
+Y_max = np.max(Y)
+Z_min = np.min(Z)
+Z_max = np.max(Z)
+print(f"X min: {X_min}, X max: {X_max}")
+print(f"Y min: {Y_min}, Y max: {Y_max}")
+print(f"Z min: {Z_min}, Z max: {Z_max}")
 
 ax = plt.figure().add_subplot(projection='3d')
 
@@ -56,11 +66,11 @@ ax.plot_surface(X, Y, Z, edgecolor='royalblue', alpha=0.3)
 # Plot projections of the contours for each dimension.  By choosing offsets
 # that match the appropriate axes limits, the projected contours will sit on
 # the 'walls' of the graph
-ax.contourf(X, Y, Z, zdir='z', offset=-0.2, cmap='coolwarm')
-ax.contourf(X, Y, Z, zdir='x', offset=-0.2, cmap='coolwarm')
-ax.contourf(X, Y, Z, zdir='y', offset=-0.2, cmap='coolwarm')
+ax.contourf(X, Y, Z, zdir='x', offset=np.min(X)-0.2, cmap='coolwarm')
+ax.contourf(X, Y, Z, zdir='y', offset=np.min(Y)-0.2, cmap='coolwarm')
+ax.contourf(X, Y, Z, zdir='z', offset=np.min(Z)-0.05, cmap='coolwarm')
 
-ax.set(xlim=(-0.2, 1.2), ylim=(-0.2, 1.2), zlim=(0.6, 0.8), xlabel='Embedding percentage', ylabel='Masked percentage', zlabel='Macro avg F1-score')
+ax.set(xlim=(np.min(X)-0.2, np.max(X)+0.2), ylim=(np.min(Y)-0.2, np.max(Y)+0.2), zlim=(np.min(Z)-0.05, np.max(Z)+0.05), xlabel='Embedding percentage', ylabel='Masked percentage', zlabel='Macro avg F1-score')
 
-plt.savefig('Encoder_classifier/Models/3dPlot.png')
+plt.savefig('Encoder_classifier/3dPlot.png')
 plt.show()
