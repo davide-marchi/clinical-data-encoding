@@ -7,7 +7,7 @@ import torch
 import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from utilsData import dataset_loader, load_data, unpack_decoded_encoder_name
+from utilsData import dataset_loader, load_data, unpack_encoder_name
 import json
 from sklearn.metrics import classification_report
 
@@ -30,7 +30,7 @@ EN_plot = False
 EN_embedding_perc_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.4, 1.6, 1.8, 2]
 EN_weight_decay = [0.05e-5, 0.2e-5]
 EN_num_epochs = [250]
-EN_masked_percentage_list = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+EN_masked_percentage_list = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
 EN_patience = [10]
 
 tot_models = len(CL_batch_size)*len(CL_learning_rate)*len(CL_weight_decay)*len(CL_num_epochs)*len(CL_patience)*len(CL_loss_weight)*\
@@ -94,7 +94,7 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
                 CL_batch_size, CL_learning_rate, CL_weight_decay, CL_num_epochs, CL_patience, CL_loss_weight):
     encoder_string = f'encoder_{en_bin_loss_w}_{en_bs}_{en_lr}_{en_emb_perc}_{en_wd}_{en_num_ep}_{en_masked_perc}_{en_pt}'
     classifier_string = f'classifier_{cl_bs}_{cl_lr}_{cl_wd}_{cl_num_ep}_{cl_pt}_{cl_loss_w}'
-    print( unpack_decoded_encoder_name(encoder_string))
+    print( unpack_encoder_name(encoder_string))
     print(f'Classifier: {classifier_string}')
 
     #check if the model already exists
