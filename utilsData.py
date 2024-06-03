@@ -4,12 +4,36 @@ import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
 
-def unpack_decoded_encoder_name(encoder_string:str)->str:
+def unpack_encoder_name(encoder_string:str)->dict:
     encoder_string = encoder_string.split('_')
     'encoder_{en_bin_loss_w}_{en_bs}_{en_lr}_{en_emb_perc}_{en_wd}_{en_num_ep}_{en_masked_perc}_{en_pt}.pth'
     encoder_string = encoder_string[1:]
-    encoder_string[-1] = encoder_string[-1].split('.')[0]
-    return f'Encoder: binary_loss_weight: {encoder_string[0]} batch_size: {encoder_string[1]} lr: {encoder_string[2]} emb_perc: {encoder_string[3]} wd: {encoder_string[4]} num_ep: {encoder_string[5]} masked_perc: {encoder_string[6]} pt: {encoder_string[7]}'
+    encoder_string[-1] = encoder_string[-1].split('.pth')[0]
+    return {
+        'binary_loss_weight': encoder_string[0],
+        'batch_size': encoder_string[1],
+        'lr': encoder_string[2],
+        'emb_perc': encoder_string[3],
+        'wd': encoder_string[4],
+        'num_ep': encoder_string[5],
+        'masked_perc': encoder_string[6],
+        'pt': encoder_string[7]
+    }
+
+def unpack_classifier_name(classifier_string:str)->dict:
+    classifier_string = classifier_string.split('_')
+    'classifier_{cl_bs}_{cl_lr}_{cl_wd}_{cl_num_ep}_{cl_pt}_{cl_loss_w}.pth'
+    classifier_string = classifier_string[1:]
+    classifier_string[-1] = classifier_string[-1].split('.pth')[0]
+    return {
+        'batch_size': classifier_string[0],
+        'lr': classifier_string[1],
+        'wd': classifier_string[2],
+        'num_ep': classifier_string[3],
+        'pt': classifier_string[4],
+        'loss_w': classifier_string[5]
+    }
+
 def load_data(path:str) -> pd.DataFrame:
     data = pd.read_csv(path)
     return data
