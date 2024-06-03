@@ -68,9 +68,9 @@ ax.plot_surface(X, Y, Z, edgecolor='royalblue', alpha=0.3)
 # the 'walls' of the graph
 ax.contourf(X, Y, Z, zdir='x', offset=np.min(X)-0.2, cmap='coolwarm')
 ax.contourf(X, Y, Z, zdir='y', offset=np.min(Y)-0.2, cmap='coolwarm')
-ax.contourf(X, Y, Z, zdir='z', offset=np.min(Z)-0.05, cmap='coolwarm')
+ax.contourf(X, Y, Z, zdir='z', offset=np.min(Z)-0.01, cmap='coolwarm')
 
-ax.set(xlim=(np.min(X)-0.2, np.max(X)+0.2), ylim=(np.min(Y)-0.2, np.max(Y)+0.2), zlim=(np.min(Z)-0.05, np.max(Z)+0.05), xlabel='Embedding percentage', ylabel='Masked percentage', zlabel='Macro avg F1-score')
+ax.set(xlim=(np.min(X)-0.2, np.max(X)+0.2), ylim=(np.min(Y)-0.2, np.max(Y)+0.2), zlim=(np.min(Z)-0.01, np.max(Z)+0.01), xlabel='Embedding percentage', ylabel='Masked percentage', zlabel='Macro avg F1-score')
 
 plt.savefig('Encoder_classifier/3dPlot.png')
 plt.show()
