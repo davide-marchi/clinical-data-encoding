@@ -10,18 +10,18 @@ from utilsData import unpack_encoder_name, unpack_classifier_name
 
 # CLASSIFIER PARAMETERS
 CL_batch_size = [200]
-CL_learning_rate = [0.0001, 0.0002, 0.0004]
+CL_learning_rate = [0.0004]
 CL_plot = False
 CL_weight_decay = [0.2e-5, 0.5e-5]
 CL_num_epochs = [50]
 CL_patience = [5]
-CL_loss_weight = [(0.3, 0.7), (0.25, 0.75), (0.5, 0.5)]
+CL_loss_weight = [(0.3, 0.7), (0.5, 0.5)]
 # ENCODER PARAMETERS
 EN_binary_loss_weight = [None, 0.5]
 EN_batch_size = [200]
-EN_learning_rate = [0.0015, 0.002]
+EN_learning_rate = [0.0015]
 EN_plot = False
-EN_embedding_perc_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]
+EN_embedding_perc_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.4, 1.6, 1.8, 2]
 EN_weight_decay = [0.05e-5, 0.2e-5]
 EN_num_epochs = [250]
 EN_masked_percentage_list = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
@@ -31,11 +31,11 @@ EN_patience = [10]
 results_file = 'Encoder_classifier/sorted_results.json'
 if not os.path.exists(results_file):
     # Sort results.json and store it
-    with open('Encoder_classifier/results.json', 'r') as file:
+    with open('Encoder_classifier/Models/results.json', 'r') as file:
         results = json.load(file)
     sorted_results = sorted(results, key=lambda x: x['report']['macro avg']['f1-score'], reverse=True)
     with open(results_file, 'w') as file:
-        json.dump(sorted_results, file)
+        json.dump(sorted_results, file, indent=4)
 else:
     with open(results_file, 'r') as file:
         results = json.load(file)

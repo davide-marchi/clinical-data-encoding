@@ -32,7 +32,7 @@ for embedding_perc, masked_percentage in product(X_unique, Y_unique):
     """
 
     # TODO: Check this
-    max_f1_score = max([model['report']['macro avg']['f1-score'] for model in results if model['embedding_perc'] == embedding_perc and model['masked_percentage'] == masked_percentage])
+    max_f1_score = np.mean([model['report']['macro avg']['f1-score'] for model in results if model['embedding_perc'] == embedding_perc and model['masked_percentage'] == masked_percentage])
     Z_list.append(max_f1_score)
     X_list.append(embedding_perc)
     Y_list.append(masked_percentage)
