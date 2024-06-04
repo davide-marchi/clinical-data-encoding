@@ -19,7 +19,6 @@ dataset = load_data(folderName + fileName)
 
 dict = dataset_loader(dataset, 0.1, 0.2, 42)
 tr_data = dict['tr_data']
-tr_data = tr_data[0:4000]
 tr_out = dict['tr_out']
 val_data = dict['val_data']
 val_out = dict['val_out']
