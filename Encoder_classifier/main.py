@@ -157,7 +157,7 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
         plot=CL_plot,
         loss_weight=cl_loss_w,
     )
-    classifier.saveModel(f'./Encoder_classifier/Models/{classifier_string}_{encoder_string}.pth')
+    # classifier.saveModel(f'./Encoder_classifier/Models/{classifier_string}_{encoder_string}.pth')
 
     ################################################################################################
     # EVALUATE #####################################################################################
