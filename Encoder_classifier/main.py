@@ -27,7 +27,7 @@ EN_binary_loss_weight = [None, 0.5]
 EN_batch_size = [200]
 EN_learning_rate = [0.0015, 0.002]
 EN_plot = False
-EN_embedding_perc_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.4, 1.6, 1.8, 2, 2.5, 3]
+EN_embedding_perc_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.5, 2, 2.5, 3]
 EN_weight_decay = [0.05e-5, 0.2e-5]
 EN_num_epochs = [250]
 EN_masked_percentage_list = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
@@ -97,10 +97,11 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
     print( unpack_encoder_name(encoder_string))
     print(f'Classifier: {classifier_string}')
 
-    #check if the model already exists
-    if classifier_string + '_' + encoder_string + '.pth' in existing_models:
+    #check if results contains the model
+    if any(model['encoder'] == encoder_string and model['classifier'] == classifier_string for model in results):
         print('Model already exists\n')
         continue
+
     ################################################################################################
     # TRAIN ENCODER ################################################################################
     ################################################################################################
