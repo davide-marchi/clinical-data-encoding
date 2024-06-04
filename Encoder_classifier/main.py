@@ -132,7 +132,7 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
             binary_loss_weight=en_bin_loss_w,
             print_every=en_num_ep,
         )
-        encoder.saveModel(f'./Encoder_classifier/Models/{encoder_string}.pth')
+        # encoder.saveModel(f'./Encoder_classifier/Models/{encoder_string}.pth')
         existing_models.append(encoder_string + '.pth')
 
     encoder.freeze()
