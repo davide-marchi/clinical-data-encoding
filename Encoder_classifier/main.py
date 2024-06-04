@@ -94,8 +94,7 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
                 CL_batch_size, CL_learning_rate, CL_weight_decay, CL_num_epochs, CL_patience, CL_loss_weight):
     encoder_string = f'encoder_{en_bin_loss_w}_{en_bs}_{en_lr}_{en_emb_perc}_{en_wd}_{en_num_ep}_{en_masked_perc}_{en_pt}'
     classifier_string = f'classifier_{cl_bs}_{cl_lr}_{cl_wd}_{cl_num_ep}_{cl_pt}_{cl_loss_w}'
-    print( unpack_encoder_name(encoder_string))
-    print(f'Classifier: {classifier_string}')
+    print(f'Encoder: {encoder_string} --- Classifier: {classifier_string}')
 
     #check if results contains the model
     if any(model['encoder'] == encoder_string and model['classifier'] == classifier_string for model in results):
