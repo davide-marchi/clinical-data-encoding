@@ -28,10 +28,12 @@ val_out = dict['val_out']
 binary_clumns = dict['bin_col']
 
 batch_size = 200
-learning_rate = 0.00001
+learning_rate = 0.0001
 plot = True
 weight_decay = 0.5e-5
-num_epochs = 100
+num_epochs = 70
+loss_weight = (0.4, 0.6)
+patience = 5
 
 print(f'Number of binary columns: {binary_clumns}')
 print(f'Total number of columns: {tr_data.shape[1]/2}')
@@ -52,8 +54,6 @@ embedding_dim = encoder_decoder.encoder[-2].out_features
 
 classifier = ClassifierBinary(inputSize=embedding_dim)
 
-patience = 10
-
 classifier.to(device)
 history = classifier.fit(train_data, 
                          tr_out, 
@@ -66,19 +66,22 @@ history = classifier.fit(train_data,
                          preprocess=encoder_decoder.encode,
                          print_every=num_epochs//10,
                          early_stopping=patience,
-                         loss_weight=(0.3, 0.75)
+                         loss_weight=loss_weight,
                          )
+
+y_pred = torch.round(classifier(encoder_decoder.encode(val_data))).detach().numpy()
+report = classification_report(val_out, y_pred, output_dict=True)
+print('\n',report['macro avg']['f1-score'])
 
 from weightTuning import tune_jointly
 
 tune_jointly(encoder_decoder, classifier, 
              tr_data, tr_out, val_data, val_out, 
              lr=0.0001, ep=20, batch_size=100, patience=50, wd=0.0001,
-             classifier_loss_weight=(0.3, 0.7),
+             classifier_loss_weight=loss_weight,
              print_time=3, device=device)
 
 y_pred = torch.round(classifier(encoder_decoder.encode(val_data))).detach().numpy()
-
 report = classification_report(val_out, y_pred, output_dict=True)
 print('\n',report['macro avg']['f1-score'])
 print('\n\nModel Trained\n\n')

@@ -44,7 +44,7 @@ surface_models = []
 en_stats = {}
 cl_stats = {}
 
-for model in results:
+for model in results[:10]:
     encoder_name = unpack_encoder_name(model['encoder'])
     classifier_name = unpack_classifier_name(model['classifier'])
     for key,value in encoder_name.items():
