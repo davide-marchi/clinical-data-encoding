@@ -25,19 +25,18 @@ val_out = dict['val_out']
 binary_clumns = dict['bin_col']
 
 
-binary_loss_weight = None
-batch_size = 200
-learning_rate = 0.0015
+binary_loss_weight = 0.5
+batch_size = 300
+learning_rate = 0.002
 plot = True
-embedding_dim = 1.6
-weight_decay = 0.2e-5
-num_epochs = 250
-masked_percentage = 0.25
-patience = 30
+embedding_dim = 0.5
+weight_decay = 0.25e-5
+num_epochs = 300
+masked_percentage = 0.2
 
 print(f'Number of binary columns: {binary_clumns}')
 print(f'Total number of columns: {tr_data.shape[1]/2}')
-print(f'Binary loss weight: {f"{binary_loss_weight:.3}" if binary_loss_weight is not None else None}')
+print(f'Binary loss weight: {binary_loss_weight:.3}')
 print(f'Batch size: {batch_size}')
 print(f'Learning rate: {learning_rate}')
 print(f'Embedding dimension: {embedding_dim}')
@@ -72,6 +71,7 @@ train_data = tr_data.to(device)
 val_data = val_data.to(device)
 data_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True)
 
+patience = 10
 
 history = encoder_decoder.fit(train_data,
                     val_data,
