@@ -6,6 +6,7 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilsData import dataset_loader, load_data
 from sklearn.metrics import classification_report
+from Classifier.Evaluation_Metrics import plot_c_matrix
 
 
 device = torch.device(  "cuda" if torch.cuda.is_available() 
@@ -25,14 +26,16 @@ tr_data = dict['tr_data']
 tr_out = dict['tr_out']
 val_data = dict['val_data']
 val_out = dict['val_out']
+test_data = dict['test_data']
+test_out = dict['test_out']
 binary_clumns = dict['bin_col']
 
 batch_size = 200
 learning_rate = 0.0001
 plot = True
 weight_decay = 0.5e-5
-num_epochs = 70
-loss_weight = (0.4, 0.6)
+num_epochs = 52
+loss_weight = (0.25, 0.7)
 patience = 5
 
 print(f'Number of binary columns: {binary_clumns}')
@@ -41,7 +44,7 @@ print(f'Learning rate: {learning_rate}')
 print(f'Weight decay: {weight_decay}')
 print(f'Number of epochs: {num_epochs}')
 
-encoder_decoder:IMEO = torch.load('./Encoder_classifier/encoder_decoder.pth')
+encoder_decoder:IMEO = torch.load('./Encoder_classifier/SuperEncoder.pth')
 
 encoder_decoder.to(device)
 
@@ -81,10 +84,13 @@ tune_jointly(encoder_decoder, classifier,
              classifier_loss_weight=loss_weight,
              print_time=3, device=device)
 
-y_pred = torch.round(classifier(encoder_decoder.encode(val_data))).detach().numpy()
-report = classification_report(val_out, y_pred, output_dict=True)
-print('\n',report['macro avg']['f1-score'])
+y_pred = torch.round(classifier(encoder_decoder.encode(test_data))).detach().numpy()
+report = classification_report(test_out, y_pred, output_dict=False)
+print('\n',report)
+plot_c_matrix(test_label=test_out, test_pred=y_pred, classifier_name='Confusion Matrix Embedding Classifier')
+
+exit()
 print('\n\nModel Trained\n\n')
 print('Saving model...')
-#encoder_decoder.saveModel('./Classifier/classifier.pth')
+encoder_decoder.saveModel('./Classifier/classifier.pth')
 print('Model saved')

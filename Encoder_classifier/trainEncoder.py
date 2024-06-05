@@ -27,13 +27,13 @@ binary_clumns = dict['bin_col']
 
 binary_loss_weight = None
 batch_size = 200
-learning_rate = 0.0015
+learning_rate = 0.001
 plot = True
-embedding_dim = 1.6
-weight_decay = 0.2e-5
+embedding_dim = 0.35
+weight_decay = 0.5e-6
 num_epochs = 250
-masked_percentage = 0.25
-patience = 30
+masked_percentage = 0.35
+patience = 10
 
 print(f'Number of binary columns: {binary_clumns}')
 print(f'Total number of columns: {tr_data.shape[1]/2}')

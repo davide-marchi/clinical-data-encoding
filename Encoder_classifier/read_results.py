@@ -1,4 +1,5 @@
 import json
+from matplotlib import animation
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
@@ -32,7 +33,7 @@ for embedding_perc, masked_percentage in product(X_unique, Y_unique):
     """
 
     # TODO: Check this
-    max_f1_score = np.mean([model['report']['macro avg']['f1-score'] for model in results if model['embedding_perc'] == embedding_perc and model['masked_percentage'] == masked_percentage])
+    max_f1_score = np.mean(sorted([model['report']['macro avg']['f1-score'] for model in results if model['embedding_perc'] == embedding_perc and model['masked_percentage'] == masked_percentage], reverse=True)[:50])
     Z_list.append(max_f1_score)
     X_list.append(embedding_perc)
     Y_list.append(masked_percentage)
@@ -61,6 +62,11 @@ print(f"Z min: {Z_min}, Z max: {Z_max}")
 ax = plt.figure().add_subplot(projection='3d')
 
 # Plot the 3D surface
+fig = plt.figure()
+
+ax = fig.add_subplot(projection='3d')
+
+# Plot the 3D surface
 ax.plot_surface(X, Y, Z, edgecolor='royalblue', alpha=0.3)
 
 # Plot projections of the contours for each dimension.  By choosing offsets
@@ -74,3 +80,10 @@ ax.set(xlim=(np.min(X)-0.2, np.max(X)+0.2), ylim=(np.min(Y)-0.2, np.max(Y)+0.2),
 
 plt.savefig('Encoder_classifier/3dPlot.png')
 plt.show()
+def rotate(angle):
+    ax.view_init(azim=angle)
+
+print("Making animation")
+arr = np.append(np.arange(90, 0, -0.5), np.arange(0, 90, 0.5))
+rot_animation = animation.FuncAnimation(fig, rotate, frames=arr, interval=1)
+rot_animation.save('rotation.gif', dpi=200, writer='imagemagick')

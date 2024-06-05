@@ -5,7 +5,7 @@ import torch.utils
 from torcheval.metrics.functional import binary_accuracy
 from torch.utils.data import DataLoader, TensorDataset
 
-torch.manual_seed(42)
+torch.manual_seed(2)
 
 class ClassifierBinary(nn.Module):
     def __init__(self, inputSize:int) -> None:

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from torcheval.metrics.functional import r2_score
 
-torch.manual_seed(42)
+#torch.manual_seed(8237641987236)
 
 # TODO: add num_layers and manage dinamically construction of the encoder and decoder
 
