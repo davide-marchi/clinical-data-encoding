@@ -16,18 +16,18 @@ from sklearn.metrics import classification_report
 
 # CLASSIFIER PARAMETERS
 CL_batch_size = [200]
-CL_learning_rate = [0.0001, 0.0002, 0.0004]
+CL_learning_rate = [0.0004]
 CL_plot = False
 CL_weight_decay = [0.2e-5, 0.5e-5]
 CL_num_epochs = [50]
 CL_patience = [5]
-CL_loss_weight = [(0.3, 0.7), (0.25, 0.75), (0.5, 0.5)]
+CL_loss_weight = [(0.3, 0.7), (0.5, 0.5)]
 # ENCODER PARAMETERS
 EN_binary_loss_weight = [None, 0.5]
 EN_batch_size = [200]
-EN_learning_rate = [0.0015, 0.002]
+EN_learning_rate = [0.0015]
 EN_plot = False
-EN_embedding_perc_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.5, 2, 2.5, 3]
+EN_embedding_perc_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.4, 1.6, 1.8, 2]
 EN_weight_decay = [0.05e-5, 0.2e-5]
 EN_num_epochs = [250]
 EN_masked_percentage_list = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
@@ -94,13 +94,13 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
                 CL_batch_size, CL_learning_rate, CL_weight_decay, CL_num_epochs, CL_patience, CL_loss_weight):
     encoder_string = f'encoder_{en_bin_loss_w}_{en_bs}_{en_lr}_{en_emb_perc}_{en_wd}_{en_num_ep}_{en_masked_perc}_{en_pt}'
     classifier_string = f'classifier_{cl_bs}_{cl_lr}_{cl_wd}_{cl_num_ep}_{cl_pt}_{cl_loss_w}'
-    print(f'Encoder: {encoder_string} --- Classifier: {classifier_string}')
+    print( unpack_encoder_name(encoder_string))
+    print(f'Classifier: {classifier_string}')
 
-    #check if results contains the model
-    if any(model['encoder'] == encoder_string and model['classifier'] == classifier_string for model in results):
+    #check if the model already exists
+    if classifier_string + '_' + encoder_string + '.pth' in existing_models:
         print('Model already exists\n')
         continue
-
     ################################################################################################
     # TRAIN ENCODER ################################################################################
     ################################################################################################
@@ -156,7 +156,7 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
         plot=CL_plot,
         loss_weight=cl_loss_w,
     )
-    # classifier.saveModel(f'./Encoder_classifier/Models/{classifier_string}_{encoder_string}.pth')
+    classifier.saveModel(f'./Encoder_classifier/Models/{classifier_string}_{encoder_string}.pth')
 
     ################################################################################################
     # EVALUATE #####################################################################################
