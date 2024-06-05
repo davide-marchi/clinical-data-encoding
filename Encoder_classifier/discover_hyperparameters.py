@@ -21,7 +21,7 @@ EN_binary_loss_weight = [None, 0.5]
 EN_batch_size = [200]
 EN_learning_rate = [0.0015, 0.002]
 EN_plot = False
-EN_embedding_perc_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
+EN_embedding_perc_list = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.5, 2, 2.5, 3]
 EN_weight_decay = [0.05e-5, 0.2e-5]
 EN_num_epochs = [250]
 EN_masked_percentage_list = [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
@@ -44,7 +44,8 @@ surface_models = []
 en_stats = {}
 cl_stats = {}
 
-for model in results[:10]:
+print(f'Number of models: {len(results)}')
+for model in results:
     encoder_name = unpack_encoder_name(model['encoder'])
     classifier_name = unpack_classifier_name(model['classifier'])
     for key,value in encoder_name.items():
@@ -62,7 +63,7 @@ for embedding_perc, masked_percentage in product(EN_embedding_perc_list, EN_mask
 # Sort surface_models by macro f1-score in descending order
 surface_models.sort(key=lambda x: x['report']['macro avg']['f1-score'], reverse=True)
 
-for model in surface_models:
+for model in surface_models[:10]:
     encoder_name = unpack_encoder_name(model['encoder'])
     classifier_name = unpack_classifier_name(model['classifier'])
     f1_score = model['report']['macro avg']['f1-score']
