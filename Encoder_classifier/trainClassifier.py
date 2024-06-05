@@ -22,7 +22,9 @@ dataset = load_data(folderName + fileName)
 
 dict = dataset_loader(dataset, 0.1, 0.2, 42)
 tr_data = dict['tr_data']
+tr_data = tr_data[4000:-1]
 tr_out = dict['tr_out']
+tr_out = tr_out[4000:-1]
 val_data = dict['val_data']
 val_out = dict['val_out']
 binary_clumns = dict['bin_col']

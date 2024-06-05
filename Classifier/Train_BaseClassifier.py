@@ -45,7 +45,9 @@ data = pd.read_csv(f'{folder_path}/chl_dataset.csv')
 data_dict = dataset_loader(data, 0.1, 0.2, 42)
 
 tr_data = data_dict["tr_data"]
+tr_data = tr_data[4000:-1]
 tr_out = data_dict["tr_out"]
+tr_out = tr_out[4000:-1]
 val_data = data_dict["val_data"]
 val_out = data_dict["val_out"]
 test_data = data_dict["test_data"]
