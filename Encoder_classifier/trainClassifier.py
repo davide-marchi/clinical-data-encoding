@@ -34,8 +34,8 @@ batch_size = 200
 learning_rate = 0.0001
 plot = True
 weight_decay = 0.5e-5
-num_epochs = 52
-loss_weight = (0.25, 0.7)
+num_epochs = 102
+loss_weight = (0.3, 0.7)
 patience = 5
 
 print(f'Number of binary columns: {binary_clumns}')
