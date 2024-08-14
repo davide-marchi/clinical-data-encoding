@@ -67,8 +67,8 @@ device = torch.device(  "cuda" if torch.cuda.is_available()
 #device = torch.device("cpu")
 print("Device: ", device)
 
-folderName = './Datasets/Cleaned_Dataset/'
-fileName = 'chl_dataset.csv'
+folderName = './Datasets/Cleaned_Dataset_7Y/'
+fileName = 'chl_dataset_known.csv'
 dataset = load_data(folderName + fileName)
 
 dict = dataset_loader(dataset, 0.1, 0.2, 42)
