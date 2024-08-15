@@ -203,9 +203,13 @@ folder_path = os.path.join(script_directory, folder_name)
 if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 # make 2 distinct datasets one with only unknown target rows and one with the others
+print("tot :\t",chl_dataset.shape)
 chl_dataset_unknown = chl_dataset[chl_dataset['Target'] == 'Unknown']
+print("unk :\t",chl_dataset_unknown.shape)
 chl_dataset_unknown = chl_dataset_unknown.drop(columns='Target')
 chl_dataset_known = chl_dataset[chl_dataset['Target'] != 'Unknown']
+print("kno :\t",chl_dataset_known.shape)
+print(chl_dataset_known['Target'].value_counts())
 chl_dataset_known['Target'] = chl_dataset_known['Target'].apply(lambda x: 0 if x == 'CVD Deceased' else 1)
 # Save the datasets to CSV files
 chl_dataset_unknown.to_csv(os.path.join(folder_path, 'chl_dataset_unknown.csv'), index=False)
