@@ -63,7 +63,7 @@ def standardize_data(data: pd.DataFrame, mask: np.ndarray) -> Tuple[pd.DataFrame
         data[col_value] = (data[col_value] - mean) / np.sqrt(variance)
     return data, binayColums
 
-def normalize_data(tr: pd.DataFrame, val:pd.DataFrame, test:pd.DataFrame , tr_mask: np.ndarray) -> Tuple[pd.DataFrame,int]:
+def normalize_data(tr: pd.DataFrame, val:pd.DataFrame, test:pd.DataFrame , tr_mask: np.ndarray, unlabledData: pd.DataFrame = None) -> Tuple[pd.DataFrame,int]:
     binaryColums = 0
     for col_value, col_mask in zip(tr.columns, tr_mask.T):
         if tr[col_value].max() == 1 and tr[col_value].min() == 0:
@@ -74,14 +74,34 @@ def normalize_data(tr: pd.DataFrame, val:pd.DataFrame, test:pd.DataFrame , tr_ma
         tr[col_value] = (tr[col_value] - min) / (max - min)
         val[col_value] = (val[col_value] - min) / (max - min)
         test[col_value] = (test[col_value] - min) / (max - min)
-    return tr, val, test, binaryColums
+        if unlabledData is not None:
+            unlabledData[col_value] = (unlabledData[col_value] - min) / (max - min)
+    return tr, val, test, unlabledData, binaryColums
 
-def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_state:int, oversampling:bool = False) -> dict:
+def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_state:int, oversampling:bool = False, unlabledDataset: pd.DataFrame = None) -> dict:
+    '''
+    in the returned dictionary:
+    - tr_data: training data for the classifier
+    - val_data: validation data for everyone
+    - test_data: test data for everyone but to be used only at the end
+    - tr_unlabled: training data for the encoder (valid only if unlabledDataset is not None)
+
+    - tr_out: training output for the classifier
+    - val_out: validation output for the classifier
+    - test_out: test output for the classifier but to be used only at the end
+
+    '''
     mask = data.copy()
     mask = mask.iloc[:, :-1]
     mask = mask.isnull().astype(int)
     mask = 1 - mask
     mask = mask.to_numpy()
+
+    if unlabledDataset is not None:
+        mask_unk = unlabledDataset.copy()
+        mask_unk = mask_unk.isnull().astype(int)
+        mask_unk = 1 - mask_unk
+        mask_unk = mask_unk.to_numpy()
 
     train_out = data.iloc[:, -1]
     data = data.iloc[:, :-1]
@@ -94,32 +114,42 @@ def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_s
     train_out, val_out = train_test_split(train_out, test_size=val_size, random_state=random_state)
     train_mask, val_mask = train_test_split(train_mask, test_size=val_size, random_state=random_state)
 
-    train_data, val_data, test_data, binary_clumns = normalize_data(train_data, val_data, test_data, train_mask)
+    train_data, val_data, test_data, unlabledDataset, binary_clumns = normalize_data(train_data, val_data, test_data, train_mask, unlabledDataset)
 
     train_data[train_mask == 0] = 0
     val_data[val_mask == 0] = 0
     test_data[test_mask == 0] = 0
+    if unlabledDataset is not None:
+        unlabledDataset[mask_unk == 0] = 0
     
     train_data = np.concatenate((train_data, train_mask), axis=1)
     val_data = np.concatenate((val_data, val_mask), axis=1)
     test_data = np.concatenate((test_data, test_mask), axis=1)
+    if unlabledDataset is not None:
+        unlabledDataset = np.concatenate((unlabledDataset, mask_unk), axis=1)
 
     train_data = train_data.astype(np.float32)
     val_data = val_data.astype(np.float32)
     test_data = test_data.astype(np.float32)
+    if unlabledDataset is not None:
+        unlabledDataset = unlabledDataset.astype(np.float32)
 
     train_data = torch.from_numpy(train_data)
     val_data = torch.from_numpy(val_data)
     test_data = torch.from_numpy(test_data)
+    if unlabledDataset is not None:
+        unlabledDataset = torch.from_numpy(unlabledDataset)
+        unlabledDataset = torch.cat((train_data, unlabledDataset), 0)
 
     train_out = torch.from_numpy(train_out.to_numpy()).float()
     val_out = torch.from_numpy(val_out.to_numpy()).float()
     test_out = torch.from_numpy(test_out.to_numpy()).float()
     
-    return {'tr_data': train_data, 
-            'tr_out': train_out, 
+    return {'tr_data': train_data,
+            'tr_out': train_out,
             'val_data': val_data, 
             'val_out': val_out, 
             'test_data': test_data, 
             'test_out': test_out, 
-            'bin_col': binary_clumns}
+            'bin_col': binary_clumns,
+            'tr_unlabled': unlabledDataset}
