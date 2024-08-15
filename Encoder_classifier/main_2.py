@@ -10,6 +10,9 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilsData import dataset_loader, load_data, unpack_encoder_name
 import json
 from sklearn.metrics import classification_report
+from skorch import NeuralNetClassifier
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import HalvingGridSearchCV, GridSearchCV
 
 # TODO: for plotting the 3D plot !!!!!see the link below!!!!subscribe to the channel
 # https://matplotlib.org/stable/gallery/mplot3d/contourf3d_2.html#sphx-glr-gallery-mplot3d-contourf3d-2-py
@@ -133,7 +136,66 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
     ################################################################################################
     # TRAIN CLASSIFIER #############################################################################
     ################################################################################################
-    
+
+    '''
+    # create the skorch wrapper
+    model = NeuralNetClassifier(
+        module = ClassifierBinary,
+        module__inputSize = encoder.embedding_dim,
+        val_data = val_data,
+        val_out = val_out,
+        optimizer = torch.optim.Adam,
+        device = device,
+        preprocessing = encoder.encode,
+        plot = False,
+    )
+
+    param_grid = {
+        'optimizer__lr' : [0.001, 0.01, 0.1, 0.2, 0.3],
+        'optimizer__weight_decay' : [0.2e-5, 0.5e-5],
+        'num_epochs' : [2],
+        'batch_size' : [200],
+        'print_every': [2],
+        'early_stopping': [5],
+        'loss_weight' : [(0.3, 0.7), (0.5, 0.5)]
+    }
+    '''
+
+    encoded_tr_data = encoder.encode(tr_data)
+
+    model = NeuralNetClassifier(
+        module = ClassifierBinary,
+        module__inputSize = encoder.embedding_dim,
+        criterion = torch.nn.BCELoss,
+        optimizer = torch.optim.Adam,
+        device = device
+    )
+
+    param_grid = {
+        'optimizer__lr' : [0.001, 0.1, 0.3],
+        'optimizer__weight_decay' : [0.1e-5, 0.5e-5],
+        'max_epochs' : [50],
+        'batch_size' : [100, 200]
+    }
+
+    grid = HalvingGridSearchCV(estimator=model, param_grid=param_grid)
+    # Reshape tr_out to be 2D
+    formatted_tr_out = tr_out.reshape(-1, 1)
+
+    print(f"Shape of encoded_tr_data: {encoded_tr_data.shape}")
+    print(f"Shape of formatted_tr_out: {formatted_tr_out.shape}")
+
+    # Use formatted_tr_out in the fit method
+    grid_result = grid.fit(encoded_tr_data, formatted_tr_out)
+    print(grid_result)
+    print(grid.cv_results_)
+
+
+    end = time()
+    tot_time = end - begin
+    print(f'Total time: {tot_time//60}m {tot_time%60}s')
+    exit()
+
     for cl_bs, cl_lr, cl_wd, cl_num_ep, cl_pt, cl_loss_w \
         in product(CL_batch_size, CL_learning_rate, CL_weight_decay, CL_num_epochs, CL_patience, CL_loss_weight):
         
