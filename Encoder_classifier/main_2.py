@@ -2,7 +2,6 @@ from time import time
 from classifier import ClassifierBinary
 from modelEncoderDecoderAdvancedV2 import IMEO
 from itertools import product
-import matplotlib.pyplot as plt
 import torch
 import os
 import sys
@@ -12,11 +11,10 @@ import json
 from sklearn.metrics import classification_report
 from skorch import NeuralNetClassifier
 from sklearn.experimental import enable_halving_search_cv
-from sklearn.model_selection import HalvingGridSearchCV, GridSearchCV
+from sklearn.model_selection import HalvingGridSearchCV
 
-# TODO: for plotting the 3D plot !!!!!see the link below!!!!subscribe to the channel
-# https://matplotlib.org/stable/gallery/mplot3d/contourf3d_2.html#sphx-glr-gallery-mplot3d-contourf3d-2-py
-
+# YEARS TO PREDICT
+years_to_death = 7
 # CLASSIFIER PARAMETERS
 CL_batch_size = [200]
 CL_learning_rate = [0.0004]
@@ -39,47 +37,31 @@ EN_patience = [10]
 tot_models = len(CL_batch_size)*len(CL_learning_rate)*len(CL_weight_decay)*len(CL_num_epochs)*len(CL_patience)*len(CL_loss_weight)*\
     len(EN_binary_loss_weight)*len(EN_batch_size)*len(EN_learning_rate)*len(EN_embedding_perc_list)*len(EN_weight_decay)*len(EN_num_epochs)*len(EN_masked_percentage_list)*len(EN_patience)
 print(f'Total number of models: {tot_models}')
-tot_min = (5/9)*tot_models
-print(f'Expected time: {tot_min//60}h {tot_min%60}m')
-
-'''
-CL_batch_size = 200
-CL_learning_rate = 0.001
-CL_plot = False
-CL_weight_decay = 0.6e-5
-CL_num_epochs = 20
-CL_patience = 10
-
-# ENCODER PARAMETERS
-EN_binary_loss_weight = 0.6 # not used
-EN_batch_size = 200
-EN_learning_rate = 0.0015
-EN_plot = False
-EN_embedding_perc_list = [0.1, 0.5, 1]
-EN_weight_decay = 0.05e-5
-EN_num_epochs = 200
-EN_masked_percentage_list = [0, 0.25, 0.5]
-EN_patience = 20
-'''
 
 device = torch.device(  "cuda" if torch.cuda.is_available() 
                         else  "mps" if torch.backends.mps.is_available()
                         else "cpu"
                     )
 #we have small amount of data, so we will use cpu (looks faster)
-#device = torch.device("cpu")
+device = torch.device("cpu")
 print("Device: ", device)
 
-folderName = './Datasets/Cleaned_Dataset/'
-fileName = 'chl_dataset.csv'
-dataset = load_data(folderName + fileName)
+folderName = f'./Datasets/Cleaned_Dataset_{years_to_death}Y/'
+fileName_kn = 'chl_dataset_known.csv'
+fileName_unk = 'chl_dataset_unknown.csv'
+dataset = load_data(folderName + fileName_kn)
+dataset_unk = load_data(folderName + fileName_unk)
 
-dict = dataset_loader(dataset, 0.1, 0.2, 42)
+dict = dataset_loader(dataset, 0.1, 0.2, 42, oversampling=False, unlabledDataset=dataset_unk)
 tr_data = dict['tr_data']
-tr_out = dict['tr_out']
+extended_tr_data = dict['tr_unlabled']
 val_data = dict['val_data']
+tr_out = dict['tr_out']
 val_out = dict['val_out']
 binary_clumns = dict['bin_col']
+
+print("data to train the encoder :",extended_tr_data.shape[0])
+print("data to trein the classifier :",tr_data.shape[0])
 
 results = []
 existing_models = []
