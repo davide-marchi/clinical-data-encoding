@@ -7,3 +7,6 @@ Copy_of_Strings_Regular_expressions_and_BS4.ipynb
 .DS_Store
 /Encoder_classifier/Models/*.pth
 .DS_Store
+
+/Datasets/Cleaned_Dataset_*Y/*.csv
+/Datasets/CD*
