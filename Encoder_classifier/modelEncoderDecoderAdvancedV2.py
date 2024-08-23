@@ -114,6 +114,23 @@ class IMEO(nn.Module):
             y = y[:, :-binCol]
         return r2_score(y, y_hat).item()
     
+    def compute_r_squared_opt(self, output, target, mask, binCol: int = 0):
+        '''
+        output: tensor of shape (batch_size, inputSize//2)
+        target: tensor of shape (batch_size, inputSize//2)
+        mask: tensor of shape (batch_size, inputSize//2)
+        binCol: int the number of binary columns in the data (binary data should be the first columns)
+            if omitted, the total_binary_columns used during creation of the NN will be used
+        return: float the r squared value
+        '''
+        y_hat = torch.mul(output, mask)
+        y = torch.mul(target, mask)
+        if self.total_binary_columns != 0 or binCol != 0:
+            binCol = self.total_binary_columns if binCol == 0 else binCol
+            y_hat = y_hat[:, :-binCol]
+            y = y[:, :-binCol]
+        return r2_score(y, y_hat).item()
+    
     def compute_accuracy(self, batch, binCol: int = 0):
         '''
         batch: tensor of shape (batch_size, inputSize)
@@ -133,9 +150,37 @@ class IMEO(nn.Module):
         y_hat_bin = torch.round(y_hat_bin)
         return (torch.sum(y_hat_bin == y_bin) / (y_hat_bin.shape[0] * binCol)).item()
     
+    def compute_accuracy_opt(self, output, target, mask, binCol: int = 0):
+        '''
+        output: tensor of shape (batch_size, inputSize//2)
+        target: tensor of shape (batch_size, inputSize//2)
+        mask: tensor of shape (batch_size, inputSize//2
+        binCol: int the number of binary columns in the data (binary data should be the first columns)
+            if omitted, the total_binary_columns used during creation of the NN will be used
+        return: float the accuracy value
+        '''
+        if self.total_binary_columns == 0 and binCol == 0:
+            return 0
+        binCol = self.total_binary_columns if binCol == 0 else binCol
+        y_hat = torch.mul(output, mask)
+        y = torch.mul(target, mask)
+        y_hat_bin = y_hat[:, :binCol]
+        y_bin = y[:, :binCol]
+        y_hat_bin = torch.round(y_hat_bin)
+        return (torch.sum(y_hat_bin == y_bin) / (y_hat_bin.shape[0] * binCol)).item()
+    
     def weighted_measure(self, batch, binCol: int = 0):
         acc = self.compute_accuracy(batch, binCol)
         r2 = self.compute_r_squared(batch, binCol)
+        if self.total_binary_columns == 0 and binCol == 0:
+            return 0
+        binCol = self.total_binary_columns if binCol == 0 else binCol
+        binWeight = binCol / (self.inputSize // 2)
+        return acc * binWeight + r2 * (1 - binWeight)
+    
+    def weighted_measure_opt(self, output, target, mask, binCol: int = 0):
+        acc = self.compute_accuracy_opt(output, target, mask, binCol)
+        r2 = self.compute_r_squared_opt(output, target, mask, binCol)
         if self.total_binary_columns == 0 and binCol == 0:
             return 0
         binCol = self.total_binary_columns if binCol == 0 else binCol
@@ -149,10 +194,21 @@ class IMEO(nn.Module):
             the weight of the continuous loss will be 1 - binaryLossWeight
         return: the total loss
         '''
-        x = imputation_batch
+        output = self(imputation_batch)
         original_val, missing_mask = torch.chunk(batch, 2, dim=1)
-        y_hat = torch.mul(self(x), missing_mask)
-        y = torch.mul(original_val, missing_mask)
+        return self.compute_loss(original_val, output, missing_mask, binaryLossWeight, forceMSE)
+    
+    def compute_loss(self, target, output, mask, binaryLossWeight: float = 0.5, forceMSE: bool = False):
+        '''
+        target: tensor of shape (batch_size, inputSize//2)
+        output: tensor of shape (batch_size, inputSize//2)
+        mask: tensor of shape (batch_size, inputSize//2)
+        binaryLossWeight: float the weight of the binary loss in the total loss (0 <= binaryLossWeight <= 1)
+            the weight of the continuous loss will be 1 - binaryLossWeight
+        return: the total loss
+        '''
+        y_hat = torch.mul(output, mask)
+        y = torch.mul(target, mask)
         if self.total_binary_columns == 0 or forceMSE:
             return nn.functional.mse_loss(y, y_hat)
         y_hat_bin = y_hat[:, :self.total_binary_columns]
@@ -163,25 +219,6 @@ class IMEO(nn.Module):
         loss_cont = nn.functional.mse_loss(y_cont, y_hat_cont)
         loss = binaryLossWeight*loss_bin + (1 - binaryLossWeight)*loss_cont
         return loss
-    
-    def compute_metrics(self, batch, binCol: int = 0, metrics:list = ['loss', 'r2', 'acc', 'a2']):
-        '''
-        batch: tensor of shape (batch_size, inputSize)
-        binCol: int the number of binary columns in the data (binary data should be the first columns)
-            if omitted, the total_binary_columns used during creation of the NN will be used
-        metrics: list the metrics to compute
-        return: dict the computed metrics
-        '''
-        metrics_dict = {}
-        if 'loss' in metrics:
-            metrics_dict['loss'] = self.training_step(batch).item()
-        if 'r2' in metrics:
-            metrics_dict['r2'] = self.compute_r_squared(batch, binCol)
-        if 'acc' in metrics:
-            metrics_dict['acc'] = self.compute_accuracy(batch, binCol)
-        if 'a2' in metrics:
-            metrics_dict['a2'] = self.weighted_measure(batch, binCol)
-        return metrics_dict
     
     def freeze(self):
         for param in self.parameters():
@@ -200,6 +237,36 @@ class IMEO(nn.Module):
         # important set to 0 imputation elements in the val part too
         val = torch.mul(val, imputation_mask)
         return torch.cat((val, imputation_mask), dim=1)
+    
+    def updateMetrics(self, metrics_required:list, metrics_hystory:dict[str,list], 
+                      train_data:torch.Tensor, val_data:torch.Tensor,
+                      binaryLossWeight:float=0.5, forceMSE:bool=False,
+                      print_flag:bool=False, numEpoch:int=-1, totEpoch:int=-1) -> dict[str,list]:
+        with torch.no_grad():
+            train_out = self(train_data)
+            train_target, train_mask = torch.chunk(train_data, 2, dim=1)
+            val_out = self(val_data)
+            val_target, val_mask = torch.chunk(val_data, 2, dim=1)
+            for metric in metrics_required:
+                if metric == 'tr_loss':
+                    metrics_hystory[metric].append(self.compute_loss(train_target, train_out, train_mask, binaryLossWeight, forceMSE).item())
+                elif metric == 'val_loss':
+                    metrics_hystory[metric].append(self.compute_loss(val_target, val_out, val_mask, binaryLossWeight, forceMSE).item())
+                elif metric == 'val_r2':
+                    metrics_hystory[metric].append(self.compute_r_squared_opt(val_out, val_target, val_mask))
+                elif metric == 'val_acc':
+                    metrics_hystory[metric].append(self.compute_accuracy_opt(val_out, val_target, val_mask))
+                elif metric == 'val_a2':
+                    metrics_hystory[metric].append(self.weighted_measure_opt(val_out, val_target, val_mask))
+            if print_flag:
+                print(f'Epoch [{numEpoch+1}/{totEpoch}]',
+                      f"Loss: {metrics_hystory['tr_loss'][-1]:.4f}" if 'tr_loss' in metrics_required else '',
+                      f"Val Loss: {metrics_hystory['val_loss'][-1]:.4f}" if 'val_loss' in metrics_required else '',
+                      f"Val R^2: {metrics_hystory['val_r2'][-1]:.2f}" if 'val_r2' in metrics_required else '',
+                      f"Val acc: {metrics_hystory['val_acc'][-1]:.2f}" if 'val_acc' in metrics_required else '',
+                      f"New a^2: {metrics_hystory['val_a2'][-1]:.2f}" if 'val_a2' in metrics_required else '',
+                      "      ", end='\r')
+        return metrics_hystory
 
     def fit(self,
             train_data:torch.Tensor, 
@@ -232,26 +299,9 @@ class IMEO(nn.Module):
                 loss = self.training_step(batch, imputation_batch, binaryLossWeight=binary_loss_weight)
                 loss.backward()
                 optimizer.step()
-            for metric in metrics:
-                if metric == 'tr_loss':
-                    metrics_hystory[metric].append(self.training_step(train_data,train_data).item())
-                elif metric == 'val_loss':
-                    metrics_hystory[metric].append(self.training_step(val_data,val_data).item())
-                elif metric == 'val_r2':
-                    metrics_hystory[metric].append(self.compute_r_squared(val_data, self.total_binary_columns))
-                elif metric == 'val_acc':
-                    metrics_hystory[metric].append(self.compute_accuracy(val_data, self.total_binary_columns))
-                elif metric == 'val_a2':
-                    metrics_hystory[metric].append(self.weighted_measure(val_data, self.total_binary_columns))
-            if (print_every != 0):
-                with torch.no_grad():
-                    print(f"Epoch [{i+1}/{num_epochs}]",
-                    f"Loss: {metrics_hystory['tr_loss'][-1]:.4f}" if 'tr_loss' in metrics else '',
-                    f"Val Loss: {metrics_hystory['val_loss'][-1]:.4f}" if 'val_loss' in metrics else '',
-                    f"Val R^2: {metrics_hystory['val_r2'][-1]:.2f}" if 'val_r2' in metrics else '',
-                    f"Val acc: {metrics_hystory['val_acc'][-1]:.2f}" if 'val_acc' in metrics else '',
-                    f"New a^2: {metrics_hystory['val_a2'][-1]:.2f}" if 'val_a2' in metrics else '',
-                    "      ", end='\r')
+            metrics_hystory = self.updateMetrics(metrics, metrics_hystory, 
+                                                 train_data, val_data, binaryLossWeight=binary_loss_weight, 
+                                                 print_flag=(print_every != 0), numEpoch=i, totEpoch=num_epochs)
             if print_every != 0 and i % print_every == 0:
                 print('')
                 
