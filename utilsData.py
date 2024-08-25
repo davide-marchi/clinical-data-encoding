@@ -1,8 +1,20 @@
+import json
+import os
 from typing import Tuple
 import numpy as np
 import pandas as pd
 import torch
 from sklearn.model_selection import train_test_split
+
+def set_gpu()->torch.device:
+    device = torch.device(  "cuda" if torch.cuda.is_available() 
+                            else  "mps" if torch.backends.mps.is_available()
+                            else "cpu"
+                        )
+    return device
+
+def set_cpu()->torch.device:
+    return torch.device("cpu")
 
 def unpack_encoder_name(encoder_string:str)->dict:
     encoder_string = encoder_string.split('_')
@@ -153,3 +165,39 @@ def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_s
             'test_out': test_out, 
             'bin_col': binary_clumns,
             'tr_unlabled': unlabledDataset}
+
+def dataset_loader_full(years:int):
+    '''
+    function written as a wrapper of dataset loader
+    in order to make the code more readable
+    args:
+    - years: number of years to death
+    '''
+    folderName = f'./Datasets/Cleaned_Dataset_{years}Y/'
+    fileName_kn = 'chl_dataset_known.csv'
+    fileName_unk = 'chl_dataset_unknown.csv'
+    dataset = load_data(folderName + fileName_kn)
+    dataset_unk = load_data(folderName + fileName_unk)
+
+    return dataset_loader(dataset, 0.1, 0.2, 42, oversampling=False, unlabledDataset=dataset_unk)
+
+def load_past_results_and_models(old_results:bool=False)->Tuple[list,list,set]:
+    '''
+    function to load the past results and models
+    args:
+    - old_results: if True, the function will load the old_results.json file
+        to use set to True for testing purposes
+    '''
+    results = []
+    existing_models = []
+    validated_models = set()
+    if os.path.exists(f'./Encoder_classifier/Models/{"old_" if old_results else ""}results.json'):
+        with open(f'./Encoder_classifier/Models/{"old_" if old_results else ""}results.json', 'r') as f:
+            results = json.load(f)
+    if os.path.exists('./Encoder_classifier/Models/'):
+        for file in os.listdir('./Encoder_classifier/Models/'):
+            if 'encoder' in file:
+                existing_models.append(file)
+    for elem in results:
+        validated_models.add(elem['encoder']+elem['classifier'])
+    return results, existing_models, validated_models
