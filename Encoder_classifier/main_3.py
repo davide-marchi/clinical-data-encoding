@@ -76,7 +76,7 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
             embedding_percentage=en_emb_perc,
             )
         encoder.fit(
-            tr_data, 
+            extended_tr_data, 
             val_data,
             optimizer = torch.optim.Adam(encoder.parameters(), 
                                         weight_decay=en_wd, 

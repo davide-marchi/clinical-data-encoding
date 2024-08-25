@@ -90,7 +90,7 @@ def normalize_data(tr: pd.DataFrame, val:pd.DataFrame, test:pd.DataFrame , tr_ma
             unlabledData[col_value] = (unlabledData[col_value] - min) / (max - min)
     return tr, val, test, unlabledData, binaryColums
 
-def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_state:int, oversampling:bool = False, unlabledDataset: pd.DataFrame = None) -> dict:
+def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_state:int, oversampling:bool = False, unlabledDataset: pd.DataFrame = None) -> dict[str,torch.Tensor]:
     '''
     in the returned dictionary:
     - tr_data: training data for the classifier

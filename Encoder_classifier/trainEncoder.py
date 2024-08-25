@@ -3,7 +3,7 @@ import torch
 import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from utilsData import dataset_loader, load_data
+from utilsData import dataset_loader_full, load_data
 
 device = torch.device(  "cuda" if torch.cuda.is_available() 
                         else  "mps" if torch.backends.mps.is_available()
@@ -13,13 +13,8 @@ device = torch.device(  "cuda" if torch.cuda.is_available()
 device = torch.device("cpu")
 print("Device: ", device)
 
-folderName = './Datasets/Cleaned_Dataset/'
-fileName = 'chl_dataset.csv'
-dataset = load_data(folderName + fileName)
-
-dict = dataset_loader(dataset, 0.1, 0.2, 42)
-tr_data = dict['tr_data']
-tr_data = tr_data[0:4000]
+dict = dataset_loader_full(years=7)
+tr_data = dict['tr_unlabled']
 tr_out = dict['tr_out']
 val_data = dict['val_data']
 val_out = dict['val_out']
