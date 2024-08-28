@@ -8,7 +8,7 @@ import torch
 import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from utilsData import dataset_loader_full, unpack_encoder_name, set_gpu, set_cpu, load_past_results_and_models
+from utilsData import dataset_loader_full, set_gpu, set_cpu, load_past_results_and_models
 import json
 from sklearn.metrics import classification_report
 from skorch import NeuralNetClassifier
@@ -52,7 +52,7 @@ val_out = dict['val_out']
 binary_clumns = dict['bin_col']
 
 # json      models in directory     validated models
-results,    existing_models,        validated_models = load_past_results_and_models(old_results=True)
+results,    existing_models,        validated_models = load_past_results_and_models()
 
 begin = time()
 for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, en_pt \
@@ -64,10 +64,11 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
     # TRAIN ENCODER ################################################################################
     ################################################################################################
     # check if encoder exists
-    if encoder_string + '.pth' in existing_models:
+    if encoder_string + '.pth' in validated_models:
         # load encoder
         encoder:IMEO = torch.load('./Encoder_classifier/Models/' + encoder_string + '.pth') 
         print('Encoder loaded')
+        continue
     else:
         # create, train and save encoder
         encoder = IMEO(
@@ -117,78 +118,36 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
         'batch_size' : [100, 200]
     }
 
-    grid = HalvingGridSearchCV(estimator=model, param_grid=param_grid)
+    grid = HalvingGridSearchCV(estimator=model, 
+                               param_grid=param_grid, 
+                               n_jobs=-1, 
+                               verbose=0,
+                               cv=3,
+                               scoring='f1_macro',
+                               )
     # Reshape tr_out to be 2D
     formatted_tr_out = tr_out.reshape(-1, 1)
 
-    print(f"Shape of encoded_tr_data: {encoded_tr_data.shape}")
-    print(f"Shape of formatted_tr_out: {formatted_tr_out.shape}")
+    #print(f"Shape of encoded_tr_data: {encoded_tr_data.shape}")
+    #print(f"Shape of formatted_tr_out: {formatted_tr_out.shape}")
 
     # Use formatted_tr_out in the fit method
     grid_result = grid.fit(encoded_tr_data, formatted_tr_out)
-    print(grid_result)
-    print(grid.cv_results_)
+    
+    #print(json.dumps(grid.best_params_, indent=4))
+    #print('best score: ',grid.best_score_)
+    y_pred = grid.predict(encoder.encode(val_data))
+    report = classification_report(val_out, y_pred, output_dict=True)
+    #print(json.dumps(report, indent=2))
 
-
-    end = time()
-    tot_time = end - begin
-    print(f'Total time: {tot_time//60}m {tot_time%60}s')
-    exit()
-
-    for cl_bs, cl_lr, cl_wd, cl_num_ep, cl_pt, cl_loss_w \
-        in product(CL_batch_size, CL_learning_rate, CL_weight_decay, CL_num_epochs, CL_patience, CL_loss_weight):
+    results.append({
+        'encoder': encoder_string,
+        'classifier': grid.best_params_,
+        'results': report
+    })
+    with open('./Encoder_classifier/Models/results.json', 'w') as f:
+        json.dump(results, f, indent=4)
         
-        classifier_string = f'classifier_{cl_bs}_{cl_lr}_{cl_wd}_{cl_num_ep}_{cl_pt}_{cl_loss_w}'
-        print(f'Classifier: {classifier_string}')
-
-        #check if the model already exists
-        if classifier_string + '_' + encoder_string + '.pth' in existing_models:
-            print('Model already exists\n')
-            continue
-
-        classifier = ClassifierBinary(inputSize=encoder.embedding_dim)
-        trLoss, vlLoss, trAcc, vlAcc = classifier.fit(
-            tr_data, tr_out, 
-            val_data, val_out, 
-            optimizer=torch.optim.Adam(classifier.parameters(), 
-                                    lr=cl_lr, 
-                                    weight_decay=cl_wd,
-                                    ), 
-            device=device, 
-            num_epochs=cl_num_ep,
-            batch_size=cl_bs,
-            preprocess=encoder.encode,
-            print_every=cl_num_ep,
-            early_stopping=cl_pt,
-            plot=CL_plot,
-            loss_weight=cl_loss_w,
-        )
-        classifier.saveModel(f'./Encoder_classifier/Models/{classifier_string}_{encoder_string}.pth')
-
-        ################################################################################################
-        # EVALUATE #####################################################################################
-        ################################################################################################
-        val_data = val_data.to(device)
-        y_pred = torch.round(classifier.forward(encoder.encode(val_data))).detach().cpu().numpy()
-        report = classification_report(val_out, y_pred, output_dict=True)
-        
-        dict_params = {
-            'encoder': encoder_string,
-            'classifier': classifier_string,
-            'embedding_dim': encoder.embedding_dim,
-            'embedding_perc': en_emb_perc,
-            'masked_percentage': en_masked_perc,
-            'trAcc': trAcc,
-            'vlAcc': vlAcc,
-            'trLoss': trLoss,
-            'vlLoss': vlLoss,
-            'report': report
-        }
-        
-        results.append(dict_params)
-        
-        with open('./Encoder_classifier/Models/results.json', 'w') as f:
-            json.dump(results, f, indent=4)
     
 end = time()
 print(f'using device: {device}')
