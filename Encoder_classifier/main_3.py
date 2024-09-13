@@ -1,7 +1,7 @@
 #only because i don't wnat ot break the other main.py
 
 from time import time
-from classifier import ClassifierBinary
+from classifier import ClassifierBinary, BCEWeightedLoss
 from modelEncoderDecoderAdvancedV2 import IMEO
 from itertools import product
 import torch
@@ -10,7 +10,7 @@ import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from utilsData import dataset_loader_full, set_gpu, set_cpu, load_past_results_and_models
 import json
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, f1_score
 from skorch import NeuralNetClassifier
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
@@ -18,15 +18,14 @@ from sklearn.model_selection import HalvingGridSearchCV
 # YEARS TO PREDICT
 years_to_death = 7
 # CLASSIFIER PARAMETERS
-CL_batch_size = [200]
-CL_learning_rate = [0.0004]
-CL_plot = False
-CL_weight_decay = [0.2e-5, 0.5e-5]
-CL_num_epochs = [2]
-CL_patience = [5]
-CL_loss_weight = [(0.3, 0.7), (0.5, 0.5)]
+param_grid = {
+        'optimizer__lr' : [0.001, 0.1, 0.3],
+        'optimizer__weight_decay' : [0.1e-5, 0.5e-5],
+        'max_epochs' : [50],
+        'batch_size' : [100, 200]
+    }
 # ENCODER PARAMETERS
-EN_binary_loss_weight = [None, 0.5]
+EN_binary_loss_weight = [ 0.001]
 EN_batch_size = [200]
 EN_learning_rate = [0.0015]
 EN_plot = False
@@ -35,10 +34,6 @@ EN_weight_decay = [0.05e-5, 0.2e-5]
 EN_num_epochs = [250]
 EN_masked_percentage_list = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55, 0.6]
 EN_patience = [10]
-
-tot_models = len(CL_batch_size)*len(CL_learning_rate)*len(CL_weight_decay)*len(CL_num_epochs)*len(CL_patience)*len(CL_loss_weight)*\
-    len(EN_binary_loss_weight)*len(EN_batch_size)*len(EN_learning_rate)*len(EN_embedding_perc_list)*len(EN_weight_decay)*len(EN_num_epochs)*len(EN_masked_percentage_list)*len(EN_patience)
-print(f'Total number of models: {tot_models}')
 
 device = set_cpu()
 
@@ -63,12 +58,13 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
     ################################################################################################
     # TRAIN ENCODER ################################################################################
     ################################################################################################
-    # check if encoder exists
-    if encoder_string + '.pth' in validated_models:
-        # load encoder
-        encoder:IMEO = torch.load('./Encoder_classifier/Models/' + encoder_string + '.pth') 
-        print('Encoder loaded')
+    if encoder_string in validated_models:
+        print(f'{encoder_string} already validated')
         continue
+    # check if encoder exists
+    if encoder_string + '.pth' in existing_models:
+        # load encoder
+        encoder:IMEO = torch.load('./Encoder_classifier/gridResults/Models/' + encoder_string + '.pth')
     else:
         # create, train and save encoder
         encoder = IMEO(
@@ -92,7 +88,7 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
             binary_loss_weight=en_bin_loss_w,
             print_every=en_num_ep,
         )
-        encoder.saveModel(f'./Encoder_classifier/Models/{encoder_string}.pth')
+        encoder.saveModel(f'./Encoder_classifier/gridResults/Models/{encoder_string}.pth')
         existing_models.append(encoder_string + '.pth')
 
     encoder.freeze()
@@ -106,46 +102,45 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
     model = NeuralNetClassifier(
         module = ClassifierBinary,
         module__inputSize = encoder.embedding_dim,
-        criterion = torch.nn.BCELoss,
         optimizer = torch.optim.Adam,
-        device = device
+        device = device,
+        criterion=torch.nn.BCELoss,
+        verbose=0,
+        callbacks='disable'
     )
-
-    param_grid = {
-        'optimizer__lr' : [0.001, 0.1, 0.3],
-        'optimizer__weight_decay' : [0.1e-5, 0.5e-5],
-        'max_epochs' : [50],
-        'batch_size' : [100, 200]
-    }
 
     grid = HalvingGridSearchCV(estimator=model, 
                                param_grid=param_grid, 
                                n_jobs=-1, 
-                               verbose=0,
+                               verbose=1,
                                cv=3,
                                scoring='f1_macro',
                                )
     # Reshape tr_out to be 2D
     formatted_tr_out = tr_out.reshape(-1, 1)
 
-    #print(f"Shape of encoded_tr_data: {encoded_tr_data.shape}")
-    #print(f"Shape of formatted_tr_out: {formatted_tr_out.shape}")
-
     # Use formatted_tr_out in the fit method
     grid_result = grid.fit(encoded_tr_data, formatted_tr_out)
     
-    #print(json.dumps(grid.best_params_, indent=4))
-    #print('best score: ',grid.best_score_)
     y_pred = grid.predict(encoder.encode(val_data))
     report = classification_report(val_out, y_pred, output_dict=True)
-    #print(json.dumps(report, indent=2))
 
     results.append({
-        'encoder': encoder_string,
+        'encoder_string': encoder_string,
+        'encoder': {
+            'binary_loss_weight': en_bin_loss_w,
+            'batch_size': en_bs,
+            'lr': en_lr,
+            'emb_perc': en_emb_perc,
+            'wd': en_wd,
+            'num_ep': en_num_ep,
+            'masked_perc': en_masked_perc,
+            'pt': en_pt
+        },
         'classifier': grid.best_params_,
         'results': report
     })
-    with open('./Encoder_classifier/Models/results.json', 'w') as f:
+    with open('./Encoder_classifier/gridResults/results.json', 'w') as f:
         json.dump(results, f, indent=4)
         
     

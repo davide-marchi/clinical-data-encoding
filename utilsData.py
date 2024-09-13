@@ -191,13 +191,13 @@ def load_past_results_and_models(old_results:bool=False)->Tuple[list,list,set]:
     results = []
     existing_models = []
     validated_models = set()
-    if os.path.exists(f'./Encoder_classifier/Models/{"old_" if old_results else ""}results.json'):
-        with open(f'./Encoder_classifier/Models/{"old_" if old_results else ""}results.json', 'r') as f:
+    if os.path.exists(f'./Encoder_classifier/gridResults/{"old_" if old_results else ""}results.json'):
+        with open(f'./Encoder_classifier/gridResults/{"old_" if old_results else ""}results.json', 'r') as f:
             results = json.load(f)
-    if os.path.exists('./Encoder_classifier/Models/'):
-        for file in os.listdir('./Encoder_classifier/Models/'):
+    if os.path.exists('./Encoder_classifier/gridResults/Models/'):
+        for file in os.listdir('./Encoder_classifier/gridResults/Models/'):
             if 'encoder' in file:
                 existing_models.append(file)
     for elem in results:
-        validated_models.add(elem['encoder']+elem['classifier'])
+        validated_models.add(elem['encoder_string'])
     return results, existing_models, validated_models
