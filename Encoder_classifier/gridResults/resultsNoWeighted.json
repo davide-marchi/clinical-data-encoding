@@ -1,0 +1,1106 @@
+[
+    {
+        "encoder_string": "encoder_0.001_200_0.0015_2_5e-07_250_0.3_10",
+        "encoder": {
+            "binary_loss_weight": 0.001,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.3,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.1,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.4791666666666667,
+                "recall": 0.34328358208955223,
+                "f1-score": 0.4,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8552631578947368,
+                "recall": 0.9122807017543859,
+                "f1-score": 0.8828522920203735,
+                "support": 285.0
+            },
+            "accuracy": 0.8039772727272727,
+            "macro avg": {
+                "precision": 0.6672149122807017,
+                "recall": 0.6277821419219691,
+                "f1-score": 0.6414261460101868,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7836766098484849,
+                "recall": 0.8039772727272727,
+                "f1-score": 0.7909457478005866,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.001_200_0.0015_2_5e-07_250_0.4_10",
+        "encoder": {
+            "binary_loss_weight": 0.001,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.4,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 100,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.32653061224489793,
+                "recall": 0.23880597014925373,
+                "f1-score": 0.27586206896551724,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8316831683168316,
+                "recall": 0.8842105263157894,
+                "f1-score": 0.8571428571428571,
+                "support": 285.0
+            },
+            "accuracy": 0.7613636363636364,
+            "macro avg": {
+                "precision": 0.5791068902808648,
+                "recall": 0.5615082482325215,
+                "f1-score": 0.5665024630541872,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7355319715645033,
+                "recall": 0.7613636363636364,
+                "f1-score": 0.746501343484102,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.001_200_0.0015_2_5e-07_250_0.5_10",
+        "encoder": {
+            "binary_loss_weight": 0.001,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.5,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.4716981132075472,
+                "recall": 0.373134328358209,
+                "f1-score": 0.4166666666666667,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8595317725752508,
+                "recall": 0.9017543859649123,
+                "f1-score": 0.8801369863013698,
+                "support": 285.0
+            },
+            "accuracy": 0.8011363636363636,
+            "macro avg": {
+                "precision": 0.665614942891399,
+                "recall": 0.6374443571615607,
+                "f1-score": 0.6484018264840182,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7857111612751482,
+                "recall": 0.8011363636363636,
+                "f1-score": 0.7919196243254462,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.001_200_0.0015_2_2e-06_250_0.3_10",
+        "encoder": {
+            "binary_loss_weight": 0.001,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.3,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.42105263157894735,
+                "recall": 0.3582089552238806,
+                "f1-score": 0.3870967741935484,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8542372881355932,
+                "recall": 0.8842105263157894,
+                "f1-score": 0.8689655172413793,
+                "support": 285.0
+            },
+            "accuracy": 0.7840909090909091,
+            "macro avg": {
+                "precision": 0.6376449598572702,
+                "recall": 0.621209740769835,
+                "f1-score": 0.6280311457174639,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.771784526802368,
+                "recall": 0.7840909090909091,
+                "f1-score": 0.7772461826271614,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.001_200_0.0015_2_2e-06_250_0.4_10",
+        "encoder": {
+            "binary_loss_weight": 0.001,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.4,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 100,
+            "max_epochs": 50,
+            "optimizer__lr": 0.1,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.42105263157894735,
+                "recall": 0.11940298507462686,
+                "f1-score": 0.18604651162790697,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8228228228228228,
+                "recall": 0.9614035087719298,
+                "f1-score": 0.8867313915857605,
+                "support": 285.0
+            },
+            "accuracy": 0.8011363636363636,
+            "macro avg": {
+                "precision": 0.621937727200885,
+                "recall": 0.5404032469232783,
+                "f1-score": 0.5363889516068338,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7463495193758352,
+                "recall": 0.8011363636363636,
+                "f1-score": 0.7533623945483282,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.001_200_0.0015_2_2e-06_250_0.5_10",
+        "encoder": {
+            "binary_loss_weight": 0.001,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.5,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.44,
+                "recall": 0.3283582089552239,
+                "f1-score": 0.37606837606837606,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8509933774834437,
+                "recall": 0.9017543859649123,
+                "f1-score": 0.8756388415672913,
+                "support": 285.0
+            },
+            "accuracy": 0.7926136363636364,
+            "macro avg": {
+                "precision": 0.6454966887417218,
+                "recall": 0.6150562974600681,
+                "f1-score": 0.6258536088178337,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7727645243829019,
+                "recall": 0.7926136363636364,
+                "f1-score": 0.7805501450092591,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_None_200_0.0015_2_5e-07_250_0.3_10",
+        "encoder": {
+            "binary_loss_weight": null,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.3,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.421875,
+                "recall": 0.40298507462686567,
+                "f1-score": 0.4122137404580153,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8611111111111112,
+                "recall": 0.8701754385964913,
+                "f1-score": 0.8656195462478184,
+                "support": 285.0
+            },
+            "accuracy": 0.78125,
+            "macro avg": {
+                "precision": 0.6414930555555556,
+                "recall": 0.6365802566116785,
+                "f1-score": 0.6389166433529169,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7775065104166667,
+                "recall": 0.78125,
+                "f1-score": 0.7793178729866912,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_None_200_0.0015_2_5e-07_250_0.4_10",
+        "encoder": {
+            "binary_loss_weight": null,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.4,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 100,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.4909090909090909,
+                "recall": 0.40298507462686567,
+                "f1-score": 0.4426229508196721,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8653198653198653,
+                "recall": 0.9017543859649123,
+                "f1-score": 0.8831615120274914,
+                "support": 285.0
+            },
+            "accuracy": 0.8068181818181818,
+            "macro avg": {
+                "precision": 0.6781144781144781,
+                "recall": 0.652369730295889,
+                "f1-score": 0.6628922314235818,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7940541781450872,
+                "recall": 0.8068181818181818,
+                "f1-score": 0.799309001797594,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_None_200_0.0015_2_5e-07_250_0.5_10",
+        "encoder": {
+            "binary_loss_weight": null,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.5,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.3,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.47540983606557374,
+                "recall": 0.43283582089552236,
+                "f1-score": 0.453125,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8694158075601375,
+                "recall": 0.887719298245614,
+                "f1-score": 0.8784722222222222,
+                "support": 285.0
+            },
+            "accuracy": 0.8011363636363636,
+            "macro avg": {
+                "precision": 0.6724128218128556,
+                "recall": 0.6602775595705682,
+                "f1-score": 0.6657986111111112,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7944203527586154,
+                "recall": 0.8011363636363636,
+                "f1-score": 0.7975112452651516,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_None_200_0.0015_2_2e-06_250_0.3_10",
+        "encoder": {
+            "binary_loss_weight": null,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.3,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 100,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.4603174603174603,
+                "recall": 0.43283582089552236,
+                "f1-score": 0.4461538461538462,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8685121107266436,
+                "recall": 0.8807017543859649,
+                "f1-score": 0.8745644599303136,
+                "support": 285.0
+            },
+            "accuracy": 0.7954545454545454,
+            "macro avg": {
+                "precision": 0.6644147855220519,
+                "recall": 0.6567687876407436,
+                "f1-score": 0.6603591530420799,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7908159698817138,
+                "recall": 0.7954545454545454,
+                "f1-score": 0.7930203942399064,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_None_200_0.0015_2_2e-06_250_0.4_10",
+        "encoder": {
+            "binary_loss_weight": null,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.4,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 100,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.52,
+                "recall": 0.3880597014925373,
+                "f1-score": 0.4444444444444444,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8642384105960265,
+                "recall": 0.9157894736842105,
+                "f1-score": 0.889267461669506,
+                "support": 285.0
+            },
+            "accuracy": 0.8153409090909091,
+            "macro avg": {
+                "precision": 0.6921192052980132,
+                "recall": 0.6519245875883739,
+                "f1-score": 0.6668559530569752,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7987157585791692,
+                "recall": 0.8153409090909091,
+                "f1-score": 0.8045994441863266,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_None_200_0.0015_2_2e-06_250_0.5_10",
+        "encoder": {
+            "binary_loss_weight": null,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.5,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 100,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.5535714285714286,
+                "recall": 0.4626865671641791,
+                "f1-score": 0.5040650406504065,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8783783783783784,
+                "recall": 0.9122807017543859,
+                "f1-score": 0.8950086058519794,
+                "support": 285.0
+            },
+            "accuracy": 0.8267045454545454,
+            "macro avg": {
+                "precision": 0.7159749034749034,
+                "recall": 0.6874836344592825,
+                "f1-score": 0.6995368232511929,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.8165543282730782,
+                "recall": 0.8267045454545454,
+                "f1-score": 0.8205960522482709,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.01_200_0.0015_2_5e-07_250_0.3_10",
+        "encoder": {
+            "binary_loss_weight": 0.01,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.3,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 100,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.5217391304347826,
+                "recall": 0.3582089552238806,
+                "f1-score": 0.4247787610619469,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8594771241830066,
+                "recall": 0.9228070175438596,
+                "f1-score": 0.8900169204737732,
+                "support": 285.0
+            },
+            "accuracy": 0.8153409090909091,
+            "macro avg": {
+                "precision": 0.6906081273088946,
+                "recall": 0.6405079863838701,
+                "f1-score": 0.65739784076786,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7951917674184298,
+                "recall": 0.8153409090909091,
+                "f1-score": 0.8014630662675448,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.01_200_0.0015_2_5e-07_250_0.4_10",
+        "encoder": {
+            "binary_loss_weight": 0.01,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.4,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.4791666666666667,
+                "recall": 0.34328358208955223,
+                "f1-score": 0.4,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8552631578947368,
+                "recall": 0.9122807017543859,
+                "f1-score": 0.8828522920203735,
+                "support": 285.0
+            },
+            "accuracy": 0.8039772727272727,
+            "macro avg": {
+                "precision": 0.6672149122807017,
+                "recall": 0.6277821419219691,
+                "f1-score": 0.6414261460101868,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7836766098484849,
+                "recall": 0.8039772727272727,
+                "f1-score": 0.7909457478005866,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.01_200_0.0015_2_5e-07_250_0.5_10",
+        "encoder": {
+            "binary_loss_weight": 0.01,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.5,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 100,
+            "max_epochs": 50,
+            "optimizer__lr": 0.3,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.6190476190476191,
+                "recall": 0.19402985074626866,
+                "f1-score": 0.29545454545454547,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8368580060422961,
+                "recall": 0.9719298245614035,
+                "f1-score": 0.8993506493506493,
+                "support": 285.0
+            },
+            "accuracy": 0.8238636363636364,
+            "macro avg": {
+                "precision": 0.7279528125449576,
+                "recall": 0.5829798376538361,
+                "f1-score": 0.5974025974025974,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7953997789722865,
+                "recall": 0.8238636363636364,
+                "f1-score": 0.7844045159386069,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.01_200_0.0015_2_2e-06_250_0.3_10",
+        "encoder": {
+            "binary_loss_weight": 0.01,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.3,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 100,
+            "max_epochs": 50,
+            "optimizer__lr": 0.3,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.5192307692307693,
+                "recall": 0.40298507462686567,
+                "f1-score": 0.453781512605042,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8666666666666667,
+                "recall": 0.9122807017543859,
+                "f1-score": 0.8888888888888888,
+                "support": 285.0
+            },
+            "accuracy": 0.8153409090909091,
+            "macro avg": {
+                "precision": 0.6929487179487179,
+                "recall": 0.6576328881906258,
+                "f1-score": 0.6713352007469654,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.8005354020979021,
+                "recall": 0.8153409090909091,
+                "f1-score": 0.8060701553348611,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.01_200_0.0015_2_2e-06_250_0.4_10",
+        "encoder": {
+            "binary_loss_weight": 0.01,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.4,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.390625,
+                "recall": 0.373134328358209,
+                "f1-score": 0.3816793893129771,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8541666666666666,
+                "recall": 0.8631578947368421,
+                "f1-score": 0.8586387434554974,
+                "support": 285.0
+            },
+            "accuracy": 0.7698863636363636,
+            "macro avg": {
+                "precision": 0.6223958333333333,
+                "recall": 0.6181461115475255,
+                "f1-score": 0.6201590663842372,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7659357244318182,
+                "recall": 0.7698863636363636,
+                "f1-score": 0.7678538663885971,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.01_200_0.0015_2_2e-06_250_0.5_10",
+        "encoder": {
+            "binary_loss_weight": 0.01,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.5,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 100,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.38461538461538464,
+                "recall": 0.29850746268656714,
+                "f1-score": 0.33613445378151263,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8433333333333334,
+                "recall": 0.887719298245614,
+                "f1-score": 0.864957264957265,
+                "support": 285.0
+            },
+            "accuracy": 0.7755681818181818,
+            "macro avg": {
+                "precision": 0.613974358974359,
+                "recall": 0.5931133804660906,
+                "f1-score": 0.6005458593693889,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.756020541958042,
+                "recall": 0.7755681818181818,
+                "f1-score": 0.7643006503300621,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.0002_200_0.0015_2_5e-07_250_0.3_10",
+        "encoder": {
+            "binary_loss_weight": 0.0002,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.3,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.4583333333333333,
+                "recall": 0.3283582089552239,
+                "f1-score": 0.3826086956521739,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8519736842105263,
+                "recall": 0.9087719298245615,
+                "f1-score": 0.8794567062818336,
+                "support": 285.0
+            },
+            "accuracy": 0.7982954545454546,
+            "macro avg": {
+                "precision": 0.6551535087719298,
+                "recall": 0.6185650693898926,
+                "f1-score": 0.6310327009670038,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7770478219696969,
+                "recall": 0.7982954545454546,
+                "f1-score": 0.7848862042585746,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.0002_200_0.0015_2_5e-07_250_0.4_10",
+        "encoder": {
+            "binary_loss_weight": 0.0002,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.4,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.43636363636363634,
+                "recall": 0.3582089552238806,
+                "f1-score": 0.39344262295081966,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8552188552188552,
+                "recall": 0.8912280701754386,
+                "f1-score": 0.872852233676976,
+                "support": 285.0
+            },
+            "accuracy": 0.7897727272727273,
+            "macro avg": {
+                "precision": 0.6457912457912458,
+                "recall": 0.6247185126996596,
+                "f1-score": 0.6331474283138978,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7754935720844812,
+                "recall": 0.7897727272727273,
+                "f1-score": 0.7816009725444405,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.0002_200_0.0015_2_5e-07_250_0.5_10",
+        "encoder": {
+            "binary_loss_weight": 0.0002,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 5e-07,
+            "num_ep": 250,
+            "masked_perc": 0.5,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.4098360655737705,
+                "recall": 0.373134328358209,
+                "f1-score": 0.390625,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8556701030927835,
+                "recall": 0.8736842105263158,
+                "f1-score": 0.8645833333333334,
+                "support": 285.0
+            },
+            "accuracy": 0.7784090909090909,
+            "macro avg": {
+                "precision": 0.6327530843332769,
+                "recall": 0.6234092694422624,
+                "f1-score": 0.6276041666666667,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.770809647087744,
+                "recall": 0.7784090909090909,
+                "f1-score": 0.7743696732954546,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.0002_200_0.0015_2_2e-06_250_0.3_10",
+        "encoder": {
+            "binary_loss_weight": 0.0002,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.3,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 5e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.49056603773584906,
+                "recall": 0.3880597014925373,
+                "f1-score": 0.43333333333333335,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.862876254180602,
+                "recall": 0.9052631578947369,
+                "f1-score": 0.8835616438356164,
+                "support": 285.0
+            },
+            "accuracy": 0.8068181818181818,
+            "macro avg": {
+                "precision": 0.6767211459582255,
+                "recall": 0.646661429693637,
+                "f1-score": 0.6584474885844749,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7920103891186745,
+                "recall": 0.8068181818181818,
+                "f1-score": 0.7978647779161477,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.0002_200_0.0015_2_2e-06_250_0.4_10",
+        "encoder": {
+            "binary_loss_weight": 0.0002,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.4,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.001,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.48148148148148145,
+                "recall": 0.3880597014925373,
+                "f1-score": 0.4297520661157025,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8624161073825504,
+                "recall": 0.9017543859649123,
+                "f1-score": 0.8816466552315609,
+                "support": 285.0
+            },
+            "accuracy": 0.8039772727272727,
+            "macro avg": {
+                "precision": 0.6719487944320159,
+                "recall": 0.6449070437287248,
+                "f1-score": 0.6556993606736317,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7899086643843355,
+                "recall": 0.8039772727272727,
+                "f1-score": 0.7956326283259856,
+                "support": 352.0
+            }
+        }
+    },
+    {
+        "encoder_string": "encoder_0.0002_200_0.0015_2_2e-06_250_0.5_10",
+        "encoder": {
+            "binary_loss_weight": 0.0002,
+            "batch_size": 200,
+            "lr": 0.0015,
+            "emb_perc": 2,
+            "wd": 2e-06,
+            "num_ep": 250,
+            "masked_perc": 0.5,
+            "pt": 10
+        },
+        "classifier": {
+            "batch_size": 200,
+            "max_epochs": 50,
+            "optimizer__lr": 0.1,
+            "optimizer__weight_decay": 1e-06
+        },
+        "results": {
+            "0.0": {
+                "precision": 0.5,
+                "recall": 0.26865671641791045,
+                "f1-score": 0.34951456310679613,
+                "support": 67.0
+            },
+            "1.0": {
+                "precision": 0.8449367088607594,
+                "recall": 0.9368421052631579,
+                "f1-score": 0.8885191347753744,
+                "support": 285.0
+            },
+            "accuracy": 0.8096590909090909,
+            "macro avg": {
+                "precision": 0.6724683544303798,
+                "recall": 0.6027494108405342,
+                "f1-score": 0.6190168489410852,
+                "support": 352.0
+            },
+            "weighted avg": {
+                "precision": 0.7792811421173763,
+                "recall": 0.8096590909090909,
+                "f1-score": 0.7859245145998212,
+                "support": 352.0
+            }
+        }
+    }
+]
