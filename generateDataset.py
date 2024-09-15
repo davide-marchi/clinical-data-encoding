@@ -210,7 +210,7 @@ chl_dataset_unknown = chl_dataset_unknown.drop(columns='Target')
 chl_dataset_known = chl_dataset[chl_dataset['Target'] != 'Unknown']
 print("kno :\t",chl_dataset_known.shape)
 print(chl_dataset_known['Target'].value_counts())
-chl_dataset_known['Target'] = chl_dataset_known['Target'].apply(lambda x: 0 if x == 'CVD Deceased' else 1)
+chl_dataset_known['Target'] = chl_dataset_known['Target'].apply(lambda x: 1 if x == 'CVD Deceased' else 0)
 # Save the datasets to CSV files
 chl_dataset_unknown.to_csv(os.path.join(folder_path, 'chl_dataset_unknown.csv'), index=False)
 chl_dataset_known.to_csv(os.path.join(folder_path, 'chl_dataset_known.csv'), index=False)

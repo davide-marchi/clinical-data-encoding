@@ -21,7 +21,7 @@ class ClassifierBinary(nn.Module):
             nn.LeakyReLU(),
             nn.BatchNorm1d(30),
             nn.Linear(in_features=30, out_features=1, bias=True),
-            nn.Sigmoid()
+            #nn.Sigmoid()
         )
         for m in self.modules():
             if isinstance(m, nn.Linear):
@@ -172,3 +172,17 @@ class DatasetClassificator(TensorDataset):
     
     def __getitem__(self, idx):
         return self.data[idx], self.target[idx]
+    
+class BCEWeightedLoss(nn.Module):
+    def __init__(self, weight=(1.0, 1.0)):
+        super().__init__()
+        self.weight = weight
+        
+    def forward(self, output, target):
+        weight_1, weight_2 = self.weight
+        output = output.squeeze()
+        target = target.squeeze()
+        class_weights = target.clone()
+        class_weights=(class_weights-1)*weight_1
+        class_weights = target*weight_2 - class_weights
+        return nn.functional.binary_cross_entropy(output, target, weight=class_weights)

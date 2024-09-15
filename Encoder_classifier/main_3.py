@@ -1,4 +1,7 @@
 #only because i don't wnat ot break the other main.py
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning, append=True)
+print("WARNING: 'ignoring future warnings' not working")
 
 from time import time
 from classifier import ClassifierBinary, BCEWeightedLoss
@@ -16,23 +19,23 @@ from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
 
 # YEARS TO PREDICT
-years_to_death = 7
+years_to_death = 8
 # CLASSIFIER PARAMETERS
 param_grid = {
-        'optimizer__lr' : [0.001, 0.1, 0.3],
+        'optimizer__lr' : [0.001, 0.3],
         'optimizer__weight_decay' : [0.1e-5, 0.5e-5],
         'max_epochs' : [50],
         'batch_size' : [100, 200]
     }
 # ENCODER PARAMETERS
-EN_binary_loss_weight = [ 0.001]
+EN_binary_loss_weight = [ 0.001, 0.01, 0.0002, 0.0005, None]# very important
 EN_batch_size = [200]
 EN_learning_rate = [0.0015]
 EN_plot = False
-EN_embedding_perc_list = [0.4, 0.6, 0.8, 1, 1.4, 2]
+EN_embedding_perc_list = [2, 1.5, 3, 1, 0.8]
 EN_weight_decay = [0.05e-5, 0.2e-5]
 EN_num_epochs = [250]
-EN_masked_percentage_list = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55, 0.6]
+EN_masked_percentage_list = [ 0.3, 0.4, 0.5, 0.6]
 EN_patience = [10]
 
 device = set_cpu()
@@ -45,6 +48,14 @@ val_data = dict['val_data']
 tr_out = dict['tr_out']
 val_out = dict['val_out']
 binary_clumns = dict['bin_col']
+#count the pos number
+posCount = tr_out.sum()
+negCount = tr_out.shape[0] - posCount
+posWeight = negCount/posCount
+print(f'Positive count: {posCount}')
+print(f'Negative count: {negCount}')
+print(f'Positive weight: {posWeight}')
+print(f'Shape of tr_out: {tr_out.shape}')
 
 # json      models in directory     validated models
 results,    existing_models,        validated_models = load_past_results_and_models()
@@ -104,7 +115,7 @@ for en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, 
         module__inputSize = encoder.embedding_dim,
         optimizer = torch.optim.Adam,
         device = device,
-        criterion=torch.nn.BCELoss,
+        criterion=torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([posWeight])),
         verbose=0,
         callbacks='disable'
     )
