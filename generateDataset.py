@@ -6,7 +6,7 @@ import pandas as pd
 
 # get the number passed as input
 parser = argparse.ArgumentParser(description='Script to print an integer.')
-parser.add_argument('-y', '--integer', type=int, help='An integer input', default=7)
+parser.add_argument('-y', '--integer', type=int, help='An integer input', default=8)
 args = parser.parse_args()
 year_to_consider = args.integer
 
