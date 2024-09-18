@@ -1,0 +1,6 @@
+{
+    "batch_size": 1000,
+    "max_epochs": 500,
+    "optimizer__lr": 0.005,
+    "optimizer__weight_decay": 1e-07
+}

@@ -38,7 +38,7 @@ class BaseClassifier(nn.Module):
             nn.BatchNorm1d(21),  # Batch normalization
             #nn.Dropout(p=0.3),
             nn.Linear(in_features=21, out_features=1, bias=True),  # Output layer
-            nn.Sigmoid()  # Activation function for binary classification
+            #nn.Sigmoid()  # Activation function for binary classification
         )
         # Initialize weights and biases using Kaiming uniform initialization
         for m in self.modules():
