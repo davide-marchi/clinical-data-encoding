@@ -13,7 +13,7 @@ device = torch.device(  "cuda" if torch.cuda.is_available()
 device = torch.device("cpu")
 print("Device: ", device)
 
-dict = dataset_loader_full(years=7)
+dict = dataset_loader_full(years=8)
 tr_data = dict['tr_unlabled']
 tr_out = dict['tr_out']
 val_data = dict['val_data']
