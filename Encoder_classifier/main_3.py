@@ -1,7 +1,6 @@
 #only because i don't wnat ot break the other main.py
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning, append=True)
-print("WARNING: 'ignoring future warnings' not working")
+#warnings.simplefilter(action='ignore', category=FutureWarning, append=True)
 
 from time import time
 from classifier import ClassifierBinary, BCEWeightedLoss
