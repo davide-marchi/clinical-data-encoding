@@ -204,10 +204,10 @@ if not os.path.exists(folder_path):
     os.makedirs(folder_path)
 # make 2 distinct datasets one with only unknown target rows and one with the others
 print("tot :\t",chl_dataset.shape)
-chl_dataset_unknown = chl_dataset[chl_dataset['Target'] == 'Unknown']
+chl_dataset_unknown = chl_dataset[chl_dataset['Target'] == 'Unknown'].copy()
 print("unk :\t",chl_dataset_unknown.shape)
 chl_dataset_unknown = chl_dataset_unknown.drop(columns='Target')
-chl_dataset_known = chl_dataset[chl_dataset['Target'] != 'Unknown']
+chl_dataset_known = chl_dataset[chl_dataset['Target'] != 'Unknown'].copy()
 print("kno :\t",chl_dataset_known.shape)
 print(chl_dataset_known['Target'].value_counts())
 chl_dataset_known['Target'] = chl_dataset_known['Target'].apply(lambda x: 1 if x == 'CVD Deceased' else 0)
