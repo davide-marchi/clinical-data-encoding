@@ -70,7 +70,7 @@ class IMEO(nn.Module):
         torch.save(self, path)
 
     def loadModel(self, path):
-        self.load_state_dict(torch.load(path))
+        self.load_state_dict(torch.load(path, weights_only=True))
 
     def reset(self):
         for m in self.modules():
@@ -238,10 +238,10 @@ class IMEO(nn.Module):
         val = torch.mul(val, imputation_mask)
         return torch.cat((val, imputation_mask), dim=1)
     
-    def updateMetrics(self, metrics_required:list, metrics_hystory:dict[str,list], 
+    def updateMetrics(self, metrics_required:list, metrics_hystory:'dict[str,list]', 
                       train_data:torch.Tensor, val_data:torch.Tensor,
                       binaryLossWeight:float=0.5, forceMSE:bool=False,
-                      print_flag:bool=False, numEpoch:int=-1, totEpoch:int=-1) -> dict[str,list]:
+                      print_flag:bool=False, numEpoch:int=-1, totEpoch:int=-1) -> 'dict[str,list]':
         with torch.no_grad():
             train_out = self(train_data)
             train_target, train_mask = torch.chunk(train_data, 2, dim=1)

@@ -34,3 +34,11 @@ To get started with the project, follow these steps:
 3. Explore the codebase and experiment with different configurations and parameters.
 4. Run the provided scripts to train the autoencoder on the augmented dataset and generate embeddings.
 5. Use the embeddings as features to train a neural network for the classification task specified in the `Cleaning_Data.ipynb` notebook.
+
+## Modified library
+To avoid 
+    .venv/lib/python3.8/site-packages/skorch/net.py:2231: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`.
+
+    We changed on skorch:
+        From:   load_kwargs = {'map_location': map_location}
+        To:     load_kwargs = {'map_location': map_location, 'weights_only':True}

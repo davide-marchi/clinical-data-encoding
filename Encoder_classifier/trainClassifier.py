@@ -41,7 +41,7 @@ print(f'Learning rate: {learning_rate}')
 print(f'Weight decay: {weight_decay}')
 print(f'Number of epochs: {num_epochs}')
 
-encoder_decoder:IMEO = torch.load('./Encoder_classifier/encoder_decoder.pth')
+encoder_decoder:IMEO = torch.load('./Encoder_classifier/encoder_decoder.pth', weights_only=True)
 
 encoder_decoder.to(device)
 

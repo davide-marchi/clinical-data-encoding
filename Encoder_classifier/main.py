@@ -6,6 +6,7 @@ from time import time
 from classifier import ClassifierBinary
 from modelEncoderDecoderAdvancedV2 import IMEO
 from itertools import product
+from tqdm import tqdm
 import torch
 import os
 import sys
@@ -64,7 +65,7 @@ begin = time()
 combinations = list(product(EN_binary_loss_weight, EN_batch_size, EN_learning_rate, EN_embedding_perc_list, EN_weight_decay, EN_num_epochs, EN_masked_percentage_list, EN_patience))
 combinations.insert(0, (None,)*len(combinations[0]))
 print(f'Number of combinations: {len(combinations)}')
-for comb in combinations:
+for comb in tqdm(combinations, desc="Processing combinations", colour="green"):
     en_bin_loss_w, en_bs, en_lr, en_emb_perc, en_wd, en_num_ep, en_masked_perc, en_pt = comb
     torch.manual_seed(42)
 
@@ -80,7 +81,7 @@ for comb in combinations:
         # check if encoder exists
         if encoder_string + '.pth' in existing_models:
             # load encoder
-            encoder:IMEO = torch.load('./Encoder_classifier/gridResults/Models/' + encoder_string + '.pth', weights_only=False)
+            encoder:IMEO = torch.load('./Encoder_classifier/gridResults/Models/' + encoder_string + '.pth', weights_only=True)
         else:
             # create, train and save encoder
             encoder = IMEO(
@@ -133,7 +134,7 @@ for comb in combinations:
 
     grid = HalvingGridSearchCV(estimator=model, 
                                param_grid=param_grid, 
-                               n_jobs=-1, 
+                               n_jobs=15, 
                                verbose=0,
                                scoring='f1_macro',
                                random_state=42,
