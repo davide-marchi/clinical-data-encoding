@@ -11,16 +11,16 @@ class ClassifierBinary(nn.Module):
     def __init__(self, inputSize:int) -> None:
         super().__init__()
         self.network = nn.Sequential(
-            nn.Linear(in_features=inputSize, out_features=80, bias=True),
+            nn.Linear(in_features=inputSize, out_features=256, bias=True),
             nn.LeakyReLU(),
-            nn.BatchNorm1d(80),
-            nn.Linear(in_features=80, out_features=50, bias=True),
+            nn.BatchNorm1d(256),
+            nn.Linear(in_features=256, out_features=128, bias=True),
             nn.LeakyReLU(),
-            nn.BatchNorm1d(50),
-            nn.Linear(in_features=50, out_features=30, bias=True),
+            nn.BatchNorm1d(128),
+            nn.Linear(in_features=128, out_features=64, bias=True),
             nn.LeakyReLU(),
-            nn.BatchNorm1d(30),
-            nn.Linear(in_features=30, out_features=1, bias=True),
+            nn.BatchNorm1d(64),
+            nn.Linear(in_features=64, out_features=1, bias=True),
             #nn.Sigmoid()
         )
         for m in self.modules():
