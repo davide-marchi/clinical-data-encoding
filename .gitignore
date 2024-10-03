@@ -9,5 +9,6 @@ Copy_of_Strings_Regular_expressions_and_BS4.ipynb
 .DS_Store
 
 Datasets/
+tmp/
 
 .venv
