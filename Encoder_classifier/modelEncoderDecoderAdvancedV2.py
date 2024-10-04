@@ -67,7 +67,7 @@ class IMEO(nn.Module):
               "neurons_num: ", neurons_num)
     
     def saveModel(self, path):
-        torch.save(self, path)
+        torch.save(self.state_dict(), path)
 
     def loadModel(self, path):
         self.load_state_dict(torch.load(path, weights_only=True))

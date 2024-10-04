@@ -201,3 +201,29 @@ def load_past_results_and_models(old_results:bool=False)->Tuple[list,list,set]:
     for elem in results:
         validated_models.add(elem['encoder_string'])
     return results, existing_models, validated_models
+
+def is_intel_xeon():
+    import platform
+    import subprocess
+    try:
+        # Check the platform system
+        system = platform.system()
+
+        if system == "Linux":
+            # On Linux, we can use lscpu or /proc/cpuinfo
+            cpu_info = subprocess.check_output("lscpu", shell=True).decode()
+        elif system == "Windows":
+            # On Windows, use wmic to get CPU info
+            cpu_info = subprocess.check_output("wmic cpu get name", shell=True).decode()
+        elif system == "Darwin":  # macOS
+            # On macOS, sysctl command can be used
+            cpu_info = subprocess.check_output("sysctl -n machdep.cpu.brand_string", shell=True).decode()
+        else:
+            return False  # Unsupported system
+
+        # Check for Intel Xeon in CPU information
+        return "Xeon" in cpu_info and "Intel" in cpu_info
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return False

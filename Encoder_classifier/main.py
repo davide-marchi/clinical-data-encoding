@@ -11,13 +11,17 @@ import torch
 import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from utilsData import dataset_loader_full, set_gpu, set_cpu, load_past_results_and_models
+from utilsData import dataset_loader_full, set_gpu, set_cpu, load_past_results_and_models, is_intel_xeon
 import json
 from sklearn.metrics import classification_report, f1_score
 from skorch import NeuralNetClassifier
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import HalvingGridSearchCV
 from skorch.callbacks import EarlyStopping
+
+xeonFlag = is_intel_xeon()
+if xeonFlag:
+    import intel_extension_for_pytorch as ipex
 
 # YEARS TO PREDICT
 years_to_death = 8
@@ -78,24 +82,25 @@ for comb in tqdm(combinations, desc="Processing combinations", colour="green"):
         if encoder_string in validated_models:
             print(f'{encoder_string} already validated')
             continue
+        # create, train and save encoder
+        encoder = IMEO(
+            inputSize=tr_data.shape[1], 
+            total_binary_columns=binary_clumns, 
+            embedding_percentage=en_emb_perc,
+            )
         # check if encoder exists
         if encoder_string + '.pth' in existing_models:
             # load encoder
-            encoder:IMEO = torch.load('./Encoder_classifier/gridResults/Models/' + encoder_string + '.pth', weights_only=True)
+            #encoder:IMEO = torch.load('./Encoder_classifier/gridResults/Models/' + encoder_string + '.pth', weights_only=False)
+            encoder.load_state_dict(torch.load('./Encoder_classifier/gridResults/Models/' + encoder_string + '.pth', weights_only=True))
         else:
-            # create, train and save encoder
-            encoder = IMEO(
-                inputSize=tr_data.shape[1], 
-                total_binary_columns=binary_clumns, 
-                embedding_percentage=en_emb_perc,
-                )
+            optimizer = torch.optim.Adam(encoder.parameters(),weight_decay=en_wd, lr=en_lr)
+            if xeonFlag:
+                encoder, optimizer = ipex.optimize(encoder, optimizer=optimizer)
             encoder.fit(
                 extended_tr_data, 
                 val_data,
-                optimizer = torch.optim.Adam(encoder.parameters(), 
-                                            weight_decay=en_wd, 
-                                            lr=en_lr
-                                            ),
+                optimizer = optimizer,
                 device = device,
                 batch_size = en_bs,
                 plot = EN_plot,
@@ -134,7 +139,7 @@ for comb in tqdm(combinations, desc="Processing combinations", colour="green"):
 
     grid = HalvingGridSearchCV(estimator=model, 
                                param_grid=param_grid, 
-                               n_jobs=15, 
+                               n_jobs=-1,
                                verbose=0,
                                scoring='f1_macro',
                                random_state=42,
