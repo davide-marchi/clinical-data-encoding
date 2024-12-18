@@ -20,9 +20,8 @@ folderName = f'./Datasets/Cleaned_Dataset_{years_to_death}Y/chl_dataset_known.cs
 dataset = load_data(folderName)
 dict_ = dataset_loader(dataset, 0.1, 0.2, 42)
 tr_data, val_data, tr_out, val_out = dict_['tr_data'], dict_['val_data'], dict_['tr_out'], dict_['val_out']
-test_dta, test_out = dict_['test_data'], dict_['test_out']
 
-
+# TODO: complete gridsearch adding various sampling strategies
 oversample = RandomOverSampler(sampling_strategy='minority', random_state=42)
 tr_data, tr_out = oversample.fit_resample(tr_data, tr_out)
 
@@ -66,6 +65,4 @@ xgb_model.fit(tr_data, tr_out)
 val_pred = xgb_model.predict(val_data)
 print(f'val f1-score: {f1_macro(val_out, val_pred)}')
 print(classification_report(val_out, val_pred))
-print(f'test f1-score: {f1_macro(test_out, xgb_model.predict(test_dta))}')
-print(classification_report(test_out, xgb_model.predict(test_dta)))
 print(f'Best hyperparameters: {best_params}')
