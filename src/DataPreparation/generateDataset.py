@@ -62,9 +62,12 @@ def remove_outliers(dataframe, column_name, threshold, minor=False):
     return dataframe[column_name]
 
 # load the datasets
-chl_dataset=pd.read_excel("Datasets/OrmoniTiroidei3Aprile2024.xlsx")
-date_dataset=pd.read_excel("Datasets/DataPrelievo.xlsx")
-creatinina_dataset=pd.read_excel("Datasets/Creatinina_AltriEsamiCorretti.xlsx")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+datasets_dir = os.path.join(script_dir, "../../Datasets/OriginalDataset")
+chl_dataset = pd.read_excel(os.path.join(datasets_dir, "OrmoniTiroidei3Aprile2024.xlsx"))
+date_dataset = pd.read_excel(os.path.join(datasets_dir, "DataPrelievo.xlsx"))
+creatinina_dataset = pd.read_excel(os.path.join(datasets_dir, "Creatinina_AltriEsamiCorretti.xlsx"))
+
 pd.options.display.max_columns = None
 pd.options.display.max_rows = None
 
