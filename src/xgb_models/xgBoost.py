@@ -1,13 +1,14 @@
 import os
 import sys
 from random import shuffle
+import json
 sys.path.insert(1, os.path.join(sys.path[0], '../..'))
 
 from xgboost import XGBClassifier # XGBoost classifier
 from time import time # to compute time
 from itertools import product #for grid search
 from tqdm import tqdm # for progress bar
-from sklearn.metrics import classification_report, f1_score # for evaluation
+from sklearn.metrics import classification_report, f1_score, balanced_accuracy_score # for evaluation
 from utilsData import dataset_loader, load_data # for loading data
 from imblearn.over_sampling import RandomOverSampler # for oversampling
 f1_macro = lambda x, y: f1_score(x, y, average='macro') # for our evaluation
@@ -67,3 +68,14 @@ print(f'val f1-score: {f1_macro(val_out, val_pred)}')
 print(classification_report(val_out, val_pred))
 print(f'Best hyperparameters: {best_params}')
 print(f'Best score: {best_score}')
+results = [{
+    'n_estimators': n_estimators,
+    'learning_rate': learning_rate,
+    'encoder': 'encoder_None_None_None_None_None_None_None_None',
+    'results': classification_report(val_out, val_pred, output_dict=True)
+}]
+
+with open(f'./src/xgb_models/results_C_{years_to_death}_Y.json', 'w') as f:
+    json.dump(results, f, indent=4)
+
+print('Results saved to results.json')

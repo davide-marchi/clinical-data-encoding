@@ -141,7 +141,7 @@ for comb in tqdm(combinations, desc="Processing combinations", colour="green"):
                                param_grid=param_grid, 
                                n_jobs=-1,
                                verbose=0,
-                               scoring='f1_macro',
+                               scoring='f1_macro',#balanced_accuracy
                                random_state=42,
                                )
     

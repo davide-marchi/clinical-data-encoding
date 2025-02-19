@@ -35,8 +35,9 @@ for result in results:
 
 print(f'Best model: {bestModel}')
 print(f'Best score: {bestScore}')
-print("_"*50)
-print(json.dumps(unpack_encoder_name(bestModel), indent=2))
+if not CLASSIFER_ONLY:
+    print("_"*50)
+    print(json.dumps(unpack_encoder_name(bestModel), indent=2))
 print("_"*50)
 print(f'Classifier hyperparameters: n_estimators={n_estimators}, learning_rate={learning_rate}')
 print("_"*50)
