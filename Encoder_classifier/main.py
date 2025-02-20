@@ -91,8 +91,8 @@ for comb in tqdm(combinations, desc="Processing combinations", colour="green"):
         # check if encoder exists
         if encoder_string + '.pth' in existing_models:
             # load encoder
-            #encoder:IMEO = torch.load('./Encoder_classifier/gridResults/Models/' + encoder_string + '.pth', weights_only=False)
-            encoder.load_state_dict(torch.load('./Encoder_classifier/gridResults/Models/' + encoder_string + '.pth', weights_only=True))
+            encoder:IMEO = torch.load('./Encoder_classifier/gridResults/Models/' + encoder_string + '.pth', weights_only=False)
+            #encoder.load_state_dict(torch.load('./Encoder_classifier/gridResults/Models/' + encoder_string + '.pth', weights_only=True))
         else:
             optimizer = torch.optim.Adam(encoder.parameters(),weight_decay=en_wd, lr=en_lr)
             if xeonFlag:
@@ -141,7 +141,7 @@ for comb in tqdm(combinations, desc="Processing combinations", colour="green"):
                                param_grid=param_grid, 
                                n_jobs=-1,
                                verbose=0,
-                               scoring='f1_macro',#balanced_accuracy
+                               scoring='balanced_accuracy',
                                random_state=42,
                                )
     

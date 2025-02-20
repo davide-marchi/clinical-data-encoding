@@ -61,10 +61,10 @@ class IMEO(nn.Module):
                 nn.init.kaiming_uniform_(m.weight)
                 nn.init.uniform_(m.bias, -0.5, 0.5)
         
-        print("input size: ", inputSize, 
-              "embedding_percentage: ",embedding_percentage,
-              "embedding_dim: ", self.embedding_dim, 
-              "neurons_num: ", neurons_num)
+        # print("input size: ", inputSize, 
+        #       "embedding_percentage: ",embedding_percentage,
+        #       "embedding_dim: ", self.embedding_dim, 
+        #       "neurons_num: ", neurons_num)
     
     def saveModel(self, path):
         torch.save(self.state_dict(), path)

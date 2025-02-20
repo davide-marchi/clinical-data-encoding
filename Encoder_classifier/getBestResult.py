@@ -8,7 +8,7 @@ import json
 
 results, _, _ = load_past_results_and_models()
 
-CLASSIFER_ONLY = False
+CLASSIFER_ONLY = True
 bestModel:str = None
 classifier_bestModel:dict = None
 bestScore:float = 0
@@ -23,13 +23,12 @@ for result in results:
             break
         else:
             continue
-    #balanced_accuracy = (result['results']["0.0"]["recall"] + result['results']["1.0"]["recall"]) / 2
-    #result['results']['balanced_accuracy'] = balanced_accuracy
-    #if balanced_accuracy > bestScore:
-    if result['results']['macro avg']['f1-score'] > bestScore:
+
+    if result['results']['macro avg']['recall'] > bestScore:
+    #if result['results']['macro avg']['f1-score'] > bestScore:
         bestModel = result['encoder_string']
-        bestScore = result['results']['macro avg']['f1-score']
-        #bestScore = balanced_accuracy
+        bestScore = result['results']['macro avg']['recall']
+        #bestScore = result['results']['macro avg']['f1-score']
         best_result = result['results']
         classifier_bestModel = result['classifier']
 
@@ -65,6 +64,6 @@ for label in ["0.0", "1.0"]:  # Itera sulle classi
 cm = confusion_matrix(true_labels, pred_labels, normalize='true')
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["0", "1"])
 disp.plot(cmap=plt.cm.Blues)
-plt.title(f'Confusion Matrix for{'' if CLASSIFER_ONLY else ' Encoder +'} Classifier')
-plt.savefig(f'nn_f1_{"C" if CLASSIFER_ONLY else "EC"}_loc.png', dpi=300)
+plt.title(f"Confusion Matrix for{'' if CLASSIFER_ONLY else ' Encoder +'} Classifier")
+plt.savefig(f'nn_balAccuracy_{"C" if CLASSIFER_ONLY else "EC"}_loc.png', dpi=300)
 plt.show()
