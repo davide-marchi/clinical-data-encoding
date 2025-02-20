@@ -8,7 +8,7 @@ from utilsData import unpack_encoder_name
 
 years_to_death = 8
 
-CLASSIFER_ONLY = False
+CLASSIFER_ONLY = True
 
 results = []
 bestScore = 0
