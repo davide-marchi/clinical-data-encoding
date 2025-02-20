@@ -46,7 +46,7 @@ for n_estimators, learning_rate in tqdm(hyperparameters, total=len(hyperparamete
     )
     xgb_model.fit(tr_data, tr_out)
     val_pred = xgb_model.predict(val_data)
-    score = f1_macro(val_out, val_pred)
+    score = balanced_accuracy_score(val_out, val_pred)
     if score > best_score:
         best_score = score
         best_params = (n_estimators, learning_rate)

@@ -13,7 +13,7 @@ from xgboost import XGBClassifier # XGBoost classifier
 from itertools import product #for grid search
 from tqdm import tqdm # for progress bar
 # for evaluation
-from sklearn.metrics import classification_report, f1_score # for evaluation
+from sklearn.metrics import classification_report, f1_score, balanced_accuracy_score # for evaluation
 f1_macro = lambda x, y: f1_score(x, y, average='macro') # for our evaluation
 import json
 # for loading data
@@ -85,7 +85,7 @@ for n_estimators, learning_rate, encoder in tqdm(hyperparameters, total=len(hype
     )
     xgb_model.fit(tr_data_enc, tr_out)
     val_pred = xgb_model.predict(val_data_enc)
-    score = f1_macro(val_out, val_pred)
+    score = balanced_accuracy_score(val_out, val_pred)
     results.append({
             'n_estimators': n_estimators,
             'learning_rate': learning_rate,
@@ -114,6 +114,6 @@ xgb_model.fit(tr_data_enc, tr_out)
 
 # Predict
 val_pred = xgb_model.predict(val_data_enc)
-print(f'val f1-score: {f1_macro(val_out, val_pred)}')
+print(f'val balanced acc: {balanced_accuracy_score(val_out, val_pred)}')
 print(classification_report(val_out, val_pred))
 print(f'Best hyperparameters: {best_params}')

@@ -22,13 +22,13 @@ else:
     with open(f'./src/xgb_models/results{years_to_death}_Y.txt', 'r') as f:
         results = json.load(f)
 for result in results:
-    #balanced_accuracy = (result['results']["0.0"]["recall"] + result['results']["1.0"]["recall"]) / 2
-    #result['results']['balanced_accuracy'] = balanced_accuracy
-    #if balanced_accuracy > bestScore:
-    if result['results']['macro avg']['f1-score'] > bestScore:
+    balanced_accuracy = (result['results']["0.0"]["recall"] + result['results']["1.0"]["recall"]) / 2
+    result['results']['balanced_accuracy'] = balanced_accuracy
+    if balanced_accuracy > bestScore:
+    #if result['results']['macro avg']['f1-score'] > bestScore:
         bestModel = result['encoder']
-        bestScore = result['results']['macro avg']['f1-score']
-        #bestScore = balanced_accuracy
+        #bestScore = result['results']['macro avg']['f1-score']
+        bestScore = balanced_accuracy
         best_result = result['results']
         n_estimators = result['n_estimators']
         learning_rate = result['learning_rate']
