@@ -9,18 +9,29 @@ from utilsData import unpack_encoder_name
 years_to_death = 8
 
 CLASSIFER_ONLY = True
+TEST_SET = True
 
 results = []
 bestScore = 0
 bestModel = None
 n_estimators = 0
 learning_rate = 0
+
+path_to_results = './src/xgb_models/results'
 if CLASSIFER_ONLY:
-    with open(f'./src/xgb_models/results_C_{years_to_death}_Y.json', 'r') as f:
-        results = json.load(f)
+    path_to_results += '_C'
+    if TEST_SET:
+        path_to_results += '_T'
+    else:
+        path_to_results += '_V'
+    path_to_results += f'_{years_to_death}Y.json'
 else:
-    with open(f'./src/xgb_models/results{years_to_death}_Y.txt', 'r') as f:
-        results = json.load(f)
+    path_to_results = f'./src/xgb_models/results{years_to_death}_Y.txt'
+
+print(f'Loading results from {path_to_results}')
+with open(path_to_results, 'r') as f:
+    results = json.load(f)
+
 for result in results:
     balanced_accuracy = (result['results']["0.0"]["recall"] + result['results']["1.0"]["recall"]) / 2
     result['results']['balanced_accuracy'] = balanced_accuracy

@@ -1,0 +1,34 @@
+[
+    {
+        "n_estimators": 80,
+        "learning_rate": 0.01,
+        "encoder": "encoder_None_None_None_None_None_None_None_None",
+        "results": {
+            "0.0": {
+                "precision": 0.8994515539305301,
+                "recall": 0.8512110726643599,
+                "f1-score": 0.8746666666666667,
+                "support": 578.0
+            },
+            "1.0": {
+                "precision": 0.5845410628019324,
+                "recall": 0.6875,
+                "f1-score": 0.6318537859007833,
+                "support": 176.0
+            },
+            "accuracy": 0.8129973474801061,
+            "macro avg": {
+                "precision": 0.7419963083662313,
+                "recall": 0.76935553633218,
+                "f1-score": 0.753260226283725,
+                "support": 754.0
+            },
+            "weighted avg": {
+                "precision": 0.8259445957891068,
+                "recall": 0.8129973474801061,
+                "f1-score": 0.8179888589547364,
+                "support": 754.0
+            }
+        }
+    }
+]

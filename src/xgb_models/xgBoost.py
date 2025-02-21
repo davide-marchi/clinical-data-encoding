@@ -21,6 +21,7 @@ folderName = f'./Datasets/Cleaned_Dataset_{years_to_death}Y/chl_dataset_known.cs
 dataset = load_data(folderName)
 dict_ = dataset_loader(dataset, 0.1, 0.2, 42)
 tr_data, val_data, tr_out, val_out = dict_['tr_data'], dict_['val_data'], dict_['tr_out'], dict_['val_out']
+ts_data, ts_out = dict_['test_data'], dict_['test_out']
 
 # TODO: complete gridsearch adding various sampling strategies
 oversample = RandomOverSampler(sampling_strategy='minority', random_state=42)
@@ -62,12 +63,12 @@ xgb_model = XGBClassifier(
 )
 xgb_model.fit(tr_data, tr_out)
 
-# Predict
+print(f'Best hyperparameters: {best_params}\n')
+
+# Predict on validation data
 val_pred = xgb_model.predict(val_data)
-print(f'val f1-score: {f1_macro(val_out, val_pred)}')
+print('\033[1m\033[92m' + 'VALIDATION' + '\033[0m')
 print(classification_report(val_out, val_pred))
-print(f'Best hyperparameters: {best_params}')
-print(f'Best score: {best_score}')
 results = [{
     'n_estimators': n_estimators,
     'learning_rate': learning_rate,
@@ -75,7 +76,19 @@ results = [{
     'results': classification_report(val_out, val_pred, output_dict=True)
 }]
 
-with open(f'./src/xgb_models/results_C_{years_to_death}_Y.json', 'w') as f:
+with open(f'./src/xgb_models/results_C_V_{years_to_death}Y.json', 'w') as f:
     json.dump(results, f, indent=4)
 
-print('Results saved to results.json')
+# Predict on test data
+ts_pred = xgb_model.predict(ts_data)
+print('\033[1m\033[92m' + 'TEST' + '\033[0m')
+print(classification_report(ts_out, ts_pred))
+results = [{
+    'n_estimators': n_estimators,
+    'learning_rate': learning_rate,
+    'encoder': 'encoder_None_None_None_None_None_None_None_None',
+    'results': classification_report(ts_out, ts_pred, output_dict=True)
+}]
+
+with open(f'./src/xgb_models/results_C_T_{years_to_death}Y.json', 'w') as f:
+    json.dump(results, f, indent=4)
