@@ -11,7 +11,7 @@ from src.xgb_models.utility_xgb import encode_with_model, get_dataset # for enco
 
 years_to_death = 8
 
-CLASSIFER_ONLY = False
+CLASSIFER_ONLY = True
 TEST_SET = True
 
 results = []

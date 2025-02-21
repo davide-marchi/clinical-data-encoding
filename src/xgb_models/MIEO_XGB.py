@@ -19,7 +19,7 @@ import json
 from utilsData import dataset_loader, load_data # for loading data
 from imblearn.over_sampling import RandomOverSampler # for oversampling
 from random import shuffle
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold, cross_val_score
 
 # YEARS TO PREDICT
 years_to_death = 8
@@ -56,7 +56,7 @@ for elem in results:
 print(f'Already computed: {len(altready_computed)}')
 print(f'Best score: {best_score}')
 
-for n_estimators, learning_rate, encoder in tqdm(hyperparameters, total=len(hyperparameters)):
+for n_estimators, learning_rate, encoder in tqdm(hyperparameters, total=len(hyperparameters), smoothing=0):
     if (n_estimators, learning_rate, encoder) in altready_computed:
         continue
     tr_data_enc, val_data_enc = encode_with_model(encoder, tr_data, val_data)
@@ -68,21 +68,56 @@ for n_estimators, learning_rate, encoder in tqdm(hyperparameters, total=len(hype
         objective='binary:logistic'
     )
     # Perform cross-validation
-    scores = cross_val_score(xgb_model, tr_data_enc, tr_out, cv=4, scoring='balanced_accuracy', n_jobs=-1)
-    score = scores.mean()
+    classification_reports = []
+    for train_index, test_index in KFold(n_splits=4, shuffle=True, random_state=42).split(tr_data_enc):
+        X_train, X_test = tr_data_enc[train_index], tr_data_enc[test_index]
+        y_train, y_test = tr_out[train_index], tr_out[test_index]
+        xgb_model.fit(X_train, y_train)
+        y_pred = xgb_model.predict(X_test)
+        report = classification_report(y_test, y_pred, output_dict=True)
+        classification_reports.append(report)
+    
+    avg_report = {
+        '0.0':{
+            'precision': sum(report['0.0']['precision'] for report in classification_reports) / len(classification_reports),
+            'recall': sum(report['0.0']['recall'] for report in classification_reports) / len(classification_reports),
+            'f1-score': sum(report['0.0']['f1-score'] for report in classification_reports) / len(classification_reports),
+            'support': sum(report['0.0']['support'] for report in classification_reports)
+        },
+        '1.0':{
+            'precision': sum(report['1.0']['precision'] for report in classification_reports) / len(classification_reports),
+            'recall': sum(report['1.0']['recall'] for report in classification_reports) / len(classification_reports),
+            'f1-score': sum(report['1.0']['f1-score'] for report in classification_reports) / len(classification_reports),
+            'support': sum(report['1.0']['support'] for report in classification_reports)
+        },
+        'accuracy': sum(report['accuracy'] for report in classification_reports) / len(classification_reports),
+        'macro avg':{
+            'precision': sum(report['macro avg']['precision'] for report in classification_reports) / len(classification_reports),
+            'recall': sum(report['macro avg']['recall'] for report in classification_reports) / len(classification_reports),
+            'f1-score': sum(report['macro avg']['f1-score'] for report in classification_reports) / len(classification_reports),
+            'support': sum(report['macro avg']['support'] for report in classification_reports)
+        },
+        'weighted avg':{
+            'precision': sum(report['weighted avg']['precision'] for report in classification_reports) / len(classification_reports),
+            'recall': sum(report['weighted avg']['recall'] for report in classification_reports) / len(classification_reports),
+            'f1-score': sum(report['weighted avg']['f1-score'] for report in classification_reports) / len(classification_reports),
+            'support': sum(report['weighted avg']['support'] for report in classification_reports)
+        }
+    }
+    
     results.append({
             'n_estimators': n_estimators,
             'learning_rate': learning_rate,
             'encoder': encoder,
-            'result': score
+            'results': avg_report
         })
     
     with open(f'./src/xgb_models/results{years_to_death}_Y.txt', 'w') as f:
             json.dump(results, f, indent=4)
             altready_computed.append((n_estimators, learning_rate, encoder))
     
-    if score > best_score:
-        best_score = score
+    if avg_report['macro avg']['recall'] > best_score:
+        best_score = avg_report['macro avg']['recall']
         best_params = (n_estimators, learning_rate, encoder)
 
 # Train the model with the best hyperparameters
