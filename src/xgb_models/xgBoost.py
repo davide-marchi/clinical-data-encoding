@@ -4,6 +4,7 @@ from random import shuffle
 import json
 sys.path.insert(1, os.path.join(sys.path[0], '../..'))
 
+from sklearn.model_selection import cross_val_score
 from xgboost import XGBClassifier # XGBoost classifier
 from time import time # to compute time
 from itertools import product #for grid search
@@ -45,10 +46,11 @@ for n_estimators, learning_rate in tqdm(hyperparameters, total=len(hyperparamete
         random_state=42,
         objective='binary:logistic'
     )
-    
-    xgb_model.fit(tr_data, tr_out)
-    val_pred = xgb_model.predict(val_data)
-    score = balanced_accuracy_score(val_out, val_pred)
+    scores = cross_val_score(xgb_model, tr_data, tr_out, cv=4, scoring='balanced_accuracy', n_jobs=-1)
+    score = scores.mean()
+    #xgb_model.fit(tr_data, tr_out)
+    #val_pred = xgb_model.predict(val_data)
+    #score = balanced_accuracy_score(val_out, val_pred)
     if score > best_score:
         best_score = score
         best_params = (n_estimators, learning_rate)
