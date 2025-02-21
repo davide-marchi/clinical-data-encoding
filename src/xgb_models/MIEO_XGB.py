@@ -5,8 +5,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '../../Encoder_classifier'))
 
 # for the models
 from utilsData import load_past_results_and_models # for loading trained models
-from modelEncoderDecoderAdvancedV2 import IMEO # for loading the MIEO model
-from utilsData import unpack_encoder_name # for unpacking the encoder name
+from src.xgb_models.utility_xgb import encode_with_model, get_dataset # for encoding the data
 import torch # for loading the models
 from xgboost import XGBClassifier # XGBoost classifier
 # for grid search
@@ -20,18 +19,12 @@ import json
 from utilsData import dataset_loader, load_data # for loading data
 from imblearn.over_sampling import RandomOverSampler # for oversampling
 from random import shuffle
-import numpy as np
-from typing import Tuple
+from sklearn.model_selection import cross_val_score
 
 # YEARS TO PREDICT
 years_to_death = 8
-                                                           # _ O _
-# Load data with dataset_loader to avoid segmentation fault   \|/
-folderName = f'./Datasets/Cleaned_Dataset_{years_to_death}Y/chl_dataset_known.csv'
-dataset = load_data(folderName)
-dict_ = dataset_loader(dataset, 0.1, 0.2, 42)
+dict_ = get_dataset()
 tr_data, val_data, tr_out, val_out = dict_['tr_data'], dict_['val_data'], dict_['tr_out'], dict_['val_out']
-binary_clumns = dict_['bin_col']
 
 oversample = RandomOverSampler(sampling_strategy='minority', random_state=42)
 tr_data, tr_out = oversample.fit_resample(tr_data, tr_out)
@@ -45,15 +38,6 @@ Learning_rate = [0.001, 0.005, 0.01, 0.05, 0.1]
 # Shuffle hyperparameters
 hyperparameters = list(product(N_estimators, Learning_rate, models_names))
 shuffle(hyperparameters)
-
-def get_model(model_name:str)->IMEO:
-    return (torch.load(f'./Encoder_classifier/gridResults/Models/{model_name}', weights_only=False))
-
-def encode_with_model(model_name:str) -> Tuple[np.array, np.array]:
-    model = get_model(model_name)
-    tr_data_enc = model.encode(tr_data).detach().numpy()
-    val_data_enc = model.encode(val_data).detach().numpy()
-    return tr_data_enc, val_data_enc
 
 # Grid search
 best_score = 0
@@ -75,23 +59,24 @@ print(f'Best score: {best_score}')
 for n_estimators, learning_rate, encoder in tqdm(hyperparameters, total=len(hyperparameters)):
     if (n_estimators, learning_rate, encoder) in altready_computed:
         continue
-    tr_data_enc, val_data_enc = encode_with_model(encoder)
+    tr_data_enc, val_data_enc = encode_with_model(encoder, tr_data, val_data)
     xgb_model = XGBClassifier(
         n_estimators=n_estimators, 
         learning_rate=learning_rate, 
-        n_jobs=2, 
+        n_jobs=-1, 
         random_state=42,
         objective='binary:logistic'
     )
-    xgb_model.fit(tr_data_enc, tr_out)
-    val_pred = xgb_model.predict(val_data_enc)
-    score = balanced_accuracy_score(val_out, val_pred)
+    # Perform cross-validation
+    scores = cross_val_score(xgb_model, tr_data_enc, tr_out, cv=4, scoring='balanced_accuracy', n_jobs=-1)
+    score = scores.mean()
     results.append({
             'n_estimators': n_estimators,
             'learning_rate': learning_rate,
             'encoder': encoder,
-            'results': classification_report(val_out, val_pred, output_dict=True)
+            'result': score
         })
+    
     with open(f'./src/xgb_models/results{years_to_death}_Y.txt', 'w') as f:
             json.dump(results, f, indent=4)
             altready_computed.append((n_estimators, learning_rate, encoder))
@@ -109,7 +94,7 @@ xgb_model = XGBClassifier(
     random_state=42,
     objective='binary:logistic'
 )
-tr_data_enc, val_data_enc = encode_with_model(model)
+tr_data_enc, val_data_enc = encode_with_model(model, tr_data, val_data)
 xgb_model.fit(tr_data_enc, tr_out)
 
 # Predict

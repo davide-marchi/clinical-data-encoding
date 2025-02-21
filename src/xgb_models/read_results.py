@@ -1,14 +1,17 @@
 import os
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '../..'))
+
 import json
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
 from matplotlib import pyplot as plt
 from utilsData import unpack_encoder_name
+from xgboost import XGBClassifier
+from src.xgb_models.utility_xgb import encode_with_model, get_dataset # for encoding the data
 
 years_to_death = 8
 
-CLASSIFER_ONLY = True
+CLASSIFER_ONLY = False
 TEST_SET = True
 
 results = []
@@ -32,17 +35,30 @@ print(f'Loading results from {path_to_results}')
 with open(path_to_results, 'r') as f:
     results = json.load(f)
 
-for result in results:
-    balanced_accuracy = (result['results']["0.0"]["recall"] + result['results']["1.0"]["recall"]) / 2
-    result['results']['balanced_accuracy'] = balanced_accuracy
-    if balanced_accuracy > bestScore:
-    #if result['results']['macro avg']['f1-score'] > bestScore:
-        bestModel = result['encoder']
-        #bestScore = result['results']['macro avg']['f1-score']
-        bestScore = balanced_accuracy
-        best_result = result['results']
-        n_estimators = result['n_estimators']
-        learning_rate = result['learning_rate']
+sorted_results = sorted(results, key=lambda x: x['results']['macro avg']['recall'], reverse=True)
+position = 1
+bestModel = sorted_results[position]['encoder']
+bestScore = sorted_results[position]['results']['macro avg']['recall']
+best_result = sorted_results[position]['results']
+n_estimators = sorted_results[position]['n_estimators']
+learning_rate = sorted_results[position]['learning_rate']
+
+if not CLASSIFER_ONLY and TEST_SET:
+    dict_ = get_dataset()
+    tr_data, ts_data, tr_out, ts_out = dict_['tr_data'], dict_['test_data'], dict_['tr_out'], dict_['test_out']
+    tr_data_enc, ts_data_enc = encode_with_model(bestModel, tr_data, ts_data)
+    xgb_model = XGBClassifier(
+        n_estimators=n_estimators, 
+        learning_rate=learning_rate, 
+        n_jobs=2, 
+        random_state=42,
+        objective='binary:logistic'
+    )
+    xgb_model.fit(tr_data_enc, tr_out)
+    ts_pred = xgb_model.predict(ts_data_enc)
+    best_result = classification_report(ts_out, ts_pred, output_dict=True)
+    bestScore = best_result['macro avg']['recall']
+
 
 print(f'Best model: {bestModel}')
 print(f'Best score: {bestScore}')
@@ -53,8 +69,7 @@ print("_"*50)
 print(f'Classifier hyperparameters: n_estimators={n_estimators}, learning_rate={learning_rate}')
 print("_"*50)
 
-sorted_results = sorted(results, key=lambda x: x['results']['macro avg']['f1-score'], reverse=True)
-
+#sorted_results = sorted(results, key=lambda x: x['results']['macro avg']['f1-score'], reverse=True)
 #print("Sorted results by score:")
 #for result in sorted_results[0:10]:
 #    print(f"Model: {unpack_encoder_name(result['encoder'])['emb_perc']}, Score: {result['results']['macro avg']['f1-score']}")
@@ -81,6 +96,6 @@ for label in ["0.0", "1.0"]:  # Itera sulle classi
 cm = confusion_matrix(true_labels, pred_labels, normalize='true')
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["0", "1"])
 disp.plot(cmap=plt.cm.Blues)
-plt.title(f'Confusion Matrix for {'' if CLASSIFER_ONLY else 'Encoder + '}Classifier')
-plt.savefig(f'xgb_f1_{'C' if CLASSIFER_ONLY else'EC'}.png', dpi=300)
+plt.title(f"Confusion Matrix for {'' if CLASSIFER_ONLY else 'Encoder + '}Classifier")
+plt.savefig(f"xgb_f1_{'C' if CLASSIFER_ONLY else'EC'}_{'T' if TEST_SET else 'V'}.png", dpi=300)
 plt.show()

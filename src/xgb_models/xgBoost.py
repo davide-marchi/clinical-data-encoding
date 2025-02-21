@@ -45,6 +45,7 @@ for n_estimators, learning_rate in tqdm(hyperparameters, total=len(hyperparamete
         random_state=42,
         objective='binary:logistic'
     )
+    
     xgb_model.fit(tr_data, tr_out)
     val_pred = xgb_model.predict(val_data)
     score = balanced_accuracy_score(val_out, val_pred)
