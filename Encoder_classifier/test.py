@@ -23,13 +23,21 @@ dict = dataset_loader_full(years=years_to_death)
 tr_data = dict['tr_data']
 extended_tr_data = dict['tr_unlabled']
 test_data = dict['test_data']
+vl_data = dict['val_data']
 tr_out = dict['tr_out']
+vl_out = dict['val_out']
 test_out = dict['test_out']
 binary_clumns = dict['bin_col']
+print(binary_clumns)
 #count the pos number
 posCount = tr_out.sum()
 negCount = tr_out.shape[0] - posCount
 posWeight = negCount/posCount
+
+tr_data=torch.cat((tr_data, vl_data), 0)
+tr_out=torch.cat((tr_out, vl_out), 0)
+print(tr_data.shape)
+print(tr_out.shape)
 
 if CLASSIFER_ONLY:
     

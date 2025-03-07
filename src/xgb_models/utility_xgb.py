@@ -7,13 +7,19 @@ from typing import Tuple
 import torch
 import numpy as np
 from Encoder_classifier.modelEncoderDecoderAdvancedV2 import IMEO
-from utilsData import dataset_loader, load_data # for loading data
+from utilsData import dataset_loader, load_data, unpack_encoder_name
 
 def get_model(model_name:str)->IMEO:
-    return (torch.load(f'./Encoder_classifier/gridResults/Models/{model_name}', weights_only=False))
+    model_data = torch.load(f'./Encoder_classifier/gridResults/Models/{model_name}', weights_only=False)
+    constructor_args = unpack_encoder_name(model_name)
+    model = IMEO(inputSize=136, total_binary_columns=46, embedding_percentage=float(constructor_args['emb_perc']))  # Assuming IMEO has a default constructor
+    model.load_state_dict(model_data)
+    return model
 
 def encode_with_model(model_name:str, tr_data, other_data) -> Tuple[np.array, np.array]:
     model = get_model(model_name)
+    if not isinstance(model, IMEO):
+        raise TypeError(f"Expected model of type IMEO, but got {type(model)}")
     tr_data_enc = model.encode(tr_data).detach().numpy()
     other_data_enc = model.encode(other_data).detach().numpy()
     return tr_data_enc, other_data_enc
