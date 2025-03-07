@@ -16,7 +16,7 @@ import json
 from sklearn.metrics import classification_report, f1_score
 from skorch import NeuralNetClassifier
 from sklearn.experimental import enable_halving_search_cv
-from sklearn.model_selection import HalvingGridSearchCV
+from sklearn.model_selection import GridSearchCV
 from skorch.callbacks import EarlyStopping
 
 xeonFlag = is_intel_xeon()
@@ -137,12 +137,13 @@ for comb in tqdm(combinations, desc="Processing combinations", colour="green"):
         callbacks=[('early_stopping', EarlyStopping(patience=10))]
     )
 
-    grid = HalvingGridSearchCV(estimator=model, 
+    grid = GridSearchCV(estimator=model, 
                                param_grid=param_grid, 
                                n_jobs=-1,
                                verbose=0,
                                scoring='balanced_accuracy',
-                               random_state=42,
+                               cv=4,
+                               #random_state=42, //For halving search
                                )
     
     grid_result = grid.fit(encoded_tr_data, tr_out)

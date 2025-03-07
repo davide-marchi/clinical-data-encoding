@@ -151,7 +151,9 @@ def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_s
     test_data = torch.from_numpy(test_data)
     if unlabledDataset is not None:
         unlabledDataset = torch.from_numpy(unlabledDataset)
-        unlabledDataset = torch.cat((train_data, unlabledDataset), 0)
+        
+        # Use only unlabled data for autoencoder
+        #unlabledDataset = torch.cat((train_data, unlabledDataset), 0)
 
     train_out = torch.from_numpy(train_out.to_numpy()).float()
     val_out = torch.from_numpy(val_out.to_numpy()).float()
@@ -166,7 +168,7 @@ def dataset_loader(data: pd.DataFrame, val_size:float, test_size:float, random_s
             'bin_col': binary_clumns,
             'tr_unlabled': unlabledDataset}
 
-def dataset_loader_full(years:int):
+def dataset_loader_full(years:int) -> 'dict[str,torch.Tensor]':
     '''
     function written as a wrapper of dataset loader
     in order to make the code more readable
@@ -179,7 +181,7 @@ def dataset_loader_full(years:int):
     dataset = load_data(folderName + fileName_kn)
     dataset_unk = load_data(folderName + fileName_unk)
 
-    return dataset_loader(dataset, 0.1, 0.2, 42, oversampling=False, unlabledDataset=dataset_unk)
+    return dataset_loader(dataset, 0.2, 0.2, 42, oversampling=False, unlabledDataset=dataset_unk)
 
 def load_past_results_and_models(old_results:bool=False)->Tuple[list,list,set]:
     '''
