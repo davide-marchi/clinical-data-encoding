@@ -1,13 +1,10 @@
 # MIEO - Masked Input Encoded Output
 
 <p align="center">
-  <img src="https://github.com/davide-marchi/clinical-data-encoding/MIEO logo.png" alt="MIEO" height="110">
+  <img src="MIEO logo.png" alt="MIEO" height="110">
 </p>
 
 <p align="center">
-  <a href="https://github.com/davide-marchi/clinical-data-encoding/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/davide-marchi/clinical-data-encoding/ci.yml?label=CI" alt="CI Status">
-  </a>
   <a href="https://github.com/davide-marchi/clinical-data-encoding/stargazers">
     <img src="https://img.shields.io/github/stars/davide-marchi/clinical-data-encoding" alt="GitHub Stars">
   </a>
