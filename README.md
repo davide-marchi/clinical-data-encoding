@@ -28,8 +28,7 @@
   </a>
 </p>
 
-Self-supervised autoencoder for structured clinical data that handles missing values via input masking and a type-aware loss.  
-Embeddings feed a downstream ANN to predict **cardiovascular death within 8 years** on an **IHD** cohort.  
+Self-supervised autoencoder for structured clinical data that handles missing values via input masking and a type-aware loss. Embeddings feed a downstream ANN to predict **cardiovascular death within 8 years** on an **IHD** cohort.  
 
 ## About
 The primary objective of this project is to develop an efficient method for representing complex clinical data in a lower-dimensional space. By leveraging autoencoders, we aim to generate embeddings that capture the underlying structure of the data while preserving important information about the patients' health status. Our ultimate goal is to handle datasets with missing data and learn to perform imputation, creating consistent embeddings even for patients with missing data.
