@@ -1,7 +1,7 @@
 # MIEO - Masked Input Encoded Output
 
 <p align="center">
-  <img src="MIEO logo.png" alt="MIEO" height="110">
+  <img src="Figures/MIEO Logo.png" alt="MIEO" height="110">
 </p>
 
 <p align="center">
