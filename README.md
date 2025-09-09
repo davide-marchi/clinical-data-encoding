@@ -3,7 +3,7 @@
 Welcome to the Clinical Data Encoding project repository! This project focuses on encoding clinical data to create embeddings of subjects' health data using autoencoders. Additionally, we extend the main dataset with additional data from other datasets related to the same patients.
 
 <div align="center">
-<img hight="250" width="400" alt="GIF" align="center" src="https://github.com/davide-marchi/clinical-data-encoding/blob/main/Figures/homer-simpson-fat.gif">
+<img hight="250" width="400" alt="GIF" align="center" src="https://github.com/davide-marchi/clinical-data-encoding/blob/main/Figures/homer-simpson.gif">
 </div>
 
 </br>
