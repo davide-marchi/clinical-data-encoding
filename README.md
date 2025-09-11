@@ -33,6 +33,10 @@ Self-supervised autoencoder for structured clinical data that handles missing va
 ## About
 The primary objective of this project is to develop an efficient method for representing complex clinical data in a lower-dimensional space. By leveraging autoencoders, we aim to generate embeddings that capture the underlying structure of the data while preserving important information about the patients' health status. Our ultimate goal is to handle datasets with missing data and learn to perform imputation, creating consistent embeddings even for patients with missing data.
 
+### Conference presentation
+Our poster for **MIEO** was displayed at the **20th International Conference on Computational Intelligence Methods for Bioinformatics and Biostatistics (CIBB 2025)**, held at **Politecnico di Milano, Milan, Italy** on 10–12 September 2025.  
+[View the poster (PDF)](https://github.com/davide-marchi/clinical-data-encoding/blob/main/PosterMIEO.pdf) · [CIBB 2025 website / program](https://www.bioinformatics.polimi.it/CIBB2025/)
+
 ## Dataset
 The main dataset used in this project is `OrmoniTiroidei3Aprile2024.xlsx`, which contains real clinical data related to thyroid disorders. Additionally, we augment the main dataset with additional data from other datasets pertaining to the same patients, enhancing the richness and diversity of the data.
 
